@@ -481,7 +481,7 @@ static int nBellFlashRate = BELL_FLASH_RATE_SLOW;
 void SetBellLed(BOOL bOpen)
 {
 	//Textout("------------bOpen:%d-----------------",bOpen);
-#if (defined(JINQIANXIANG) || defined(BAFANGDIANZI) || defined(NEW_BRAOD_AES))
+#if (defined(JINQIANXIANG) || defined(BAFANGDIANZI) || defined(ZHENGSHOW))
 #else
 	ControlIO(BELL_LED, bOpen);
 #endif
@@ -1223,7 +1223,7 @@ void *OnOpenLedProc(void *p)
             bSetKonxLedOn = TRUE;
             bReSetKonxLedOn = FALSE;
             Textout("Open Konx LED when PIR================");
-#ifndef NEW_BRAOD_AES
+#ifndef ZHENGSHOW
             ControlIO(BELL_LED, 1);
 #endif
         }
@@ -1235,7 +1235,7 @@ void *OnOpenLedProc(void *p)
                 if ( !CheckStartCalling() )
                 {
                     Textout("Close Konx LED when PIR Over================");
-#ifndef NEW_BRAOD_AES
+#ifndef ZHENGSHOW
                     ControlIO(BELL_LED, 0);
 #endif
                 }
@@ -1353,6 +1353,9 @@ void OnReset()
 
 #ifdef LDPUSH
     DoSystem( "rm /param/pushparamlist.bin" );
+#endif
+#ifdef FCM_PUSH
+	DoSystem( "rm /param/fcmparamlist.bin" );
 #endif
     SetRebootCgi();
 }
@@ -1770,15 +1773,7 @@ void BaDelayCloseGongFangTimer(unsigned int sit)
         #endif
     
         #ifdef BELL_AUDIO
-        
-        //portvalue |= BELL_AUDIO;
-
-            //#ifdef PREFIX_ZSKJ
-             //portvalue &= ~BELL_AUDIO;
-            //#else
-            portvalue |= BELL_AUDIO;
-            //#endif
-            
+        portvalue |= BELL_AUDIO;
         #endif
 
         #ifdef BELL_AUDIO_2ND
@@ -1806,13 +1801,7 @@ void SetAudioGongFang(BOOL bOpen)
 
 
         #ifdef BELL_AUDIO
-        //portvalue &= ~BELL_AUDIO;
-
-            //#ifdef PREFIX_ZSKJ
-            //portvalue |= BELL_AUDIO;
-            //#else
-            portvalue &= ~BELL_AUDIO;
-            //#endif
+        portvalue &= ~BELL_AUDIO;
         #endif
 
         #ifdef BELL_AUDIO_2ND
@@ -1900,14 +1889,20 @@ void GpioStatusLed( char value )
     }
 
     GpioLock();
+	#ifdef PREFIX_8433
+	mask |= _MOTO_D2;
+	#else
     mask = ~_MOTO_D1;
-    //mask = ~_MOTO_D0;
+	#endif
     portvalue = portvalue & mask;
 
     if ( value )
     {
-        portvalue |= _MOTO_D1;
-        //portvalue |= _MOTO_D0;
+    	#ifdef PREFIX_8433
+        portvalue |= _MOTO_D2;
+		#else
+		portvalue |= _MOTO_D1;
+		#endif
     }
 
     Textout( "motofd = %d, portvalue = %08x", motofd, portvalue );

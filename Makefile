@@ -41,8 +41,7 @@ ENCRPT_LIBS = /Lib/ENCRYPT/liblounny199.a
 AP_MODULE = AP_MODULE
 ####################################################
 P2P_OBJS	=	\
-        /Lib/P2P/libPPCS_API.a    
-CFLAGS += -DPPCS_API
+        /Lib/P2P/libPPPP_API_20151211.a    \
 
 BIZ_OBJS	=	\
 		/Lib/biz_lib/libBiz_API_test.a	\
@@ -73,6 +72,10 @@ CFLAGS += -DSENSOR_3861
 #		/Lib/SENSOR/UvcXU.o
 #
 #CFLAGS += -DSENSOR_8433
+#####################################################
+#socket mail surpport SSL
+CFLAGS += -DHAVE_SSL
+OPENSSL = -L/mnt/hgfs/project/library/mailx/ssl/lib -lssl -lcrypto
 #####################################################
 
 export

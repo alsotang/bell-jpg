@@ -15,6 +15,7 @@ INC_PATH:=-I$(SDK_DIR)/web -I$(SDK_DIR)/include -I$(SDK_DIR)/biz_include \
 	-I/home/yiqing/5350/RT288x_SDK/source/lib/libnvram \
 	-I/home/yiqing/5350/RT288x_SDK/source/linux-2.6.21.x/include \
 	-I/home/yiqing/5350/RT288x_SDK/source/linux-2.6.21.x/drivers/char \
+	-I/mnt/hgfs/project/library/mailx/ssl/include \
 	-DCONFIG_RALINK_RT5350
 #		  -I$(SDK_DIR)/alsa
 LDFLAGS :=

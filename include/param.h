@@ -51,6 +51,19 @@ typedef struct _stPushParamList
 }PUSHPARAMLIST,PPUSHPARAMLIST;
 //#endif
 
+typedef struct _stGcmParam
+{
+	char apiKey[40];
+	char token[170];
+	time_t registerTime;
+}GCMPARAM,*PGCMPARAM;
+
+typedef struct _stGcmParamList
+{
+    GCMPARAM stgcmParam[MAX_PUSH_SIZE];
+    int validity;//有效期，以小时为单位，当前时间超过注册时间validity小时，就不推送
+}GCMPARAMLIST,PGCMPARAMLIST;
+
 
 
 typedef struct _stJPushParamList
@@ -665,7 +678,7 @@ typedef struct
 
 //OUTPUT(RISEN)
 #define	BELL_OPENDOOR		_ALARMOUT		//Open Door(K)
-#define	BELL_LED			_MOTO_D2		//Status LED
+//#define	BELL_LED			_MOTO_D2		//Status LED
 #define BELL_AUDIO          _MOTO_UP        //Ctrl LY8898
 #define BELL_CTRL433        _MOTO_D5
 #endif
@@ -1595,6 +1608,7 @@ extern char jpush_address[16];
 extern char bEnablePush;
 //#endif
 
+extern GCMPARAMLIST fcmparamlist;
 
 #ifdef TENVIS
 extern TTENVISPARAM tenvisparam;
@@ -1629,6 +1643,12 @@ int jPush(char *send_data);
 void ReadPushParams(void);
 void WritePushParams(void);
 int LdPush(char *send_data,char type);
+#endif
+
+#ifdef FCM_PUSH
+void ReadFcmParams(void);
+void WriteFcmParams(void);
+int FcmPush(char *send_data);
 #endif
 
 #endif //__CONFIG_H__

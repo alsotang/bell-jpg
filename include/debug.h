@@ -73,9 +73,9 @@
 //61=BAFANGDIANZI
 
 
-#define LANGUAGE_ID 1   //1=Chinese
+#define LANGUAGE_ID 2   //1=Chinese
 						//2=English
-						//对于英国客户来说，1:ppcs  2:pppp
+						//对于英国客户来说，1:ppcs  2:pppp(旧库)
 
 #define PRODUCT_ID  1   //1=MJPEG
 //2=HD720(AIT-8433/SONIX 291A/B)
@@ -183,7 +183,7 @@
 //#define OLD_KERNEL_XDBL
 //#define NEW_KERNEL_XDBL
 //#define PPCS_P2P_TEST
-
+//#define PREFIX_8433
 /***************************************/
 
 
@@ -208,6 +208,7 @@
 #endif
 /* add begin by yiqing, 2016-05-13*/
 #define PPCS_AES_P2P //善云p2p
+#define FCM_PUSH
 
 #elif defined (PREFIX_OBJ)
 #define MAJOR_VERSION   6
@@ -218,6 +219,9 @@
 
 #define SUPPORT_FM34
 #define SUPPORT_IRCUT
+
+/* add begin by yiqing, 2016-07-18,fcm推送*/
+#define FCM_PUSH
 
 #elif defined (OLD_KERNEL_XDBL)
 #define MAJOR_VERSION   8
@@ -232,6 +236,10 @@
 #define SUPPORT_IRCUT
 #define PPCS_AES_P2P //善云p2p
 
+#elif defined (PREFIX_8433)
+#define MAJOR_VERSION   10
+#define PPCS_AES_P2P //善云p2p
+
 #endif
 
 //#define JPUSH
@@ -242,7 +250,9 @@
 #endif
 
 #ifndef PPCS_API
+#ifndef PPCS_API_OLDs
 #define XQ_P2P
+#endif
 #endif
 /* BEGIN: Added by yiqing, 2015/5/7 */
 //#define LOCK_TYPE_NC

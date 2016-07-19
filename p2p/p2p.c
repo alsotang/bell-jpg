@@ -24,7 +24,11 @@
 #include "PPCS_Error.h"
 #include "PPCS_API.h"
 #else
-
+#ifdef PPCS_API_OLD
+#include "PPPP_Type.h"
+#include "PPPP_Error.h"
+#include "PPPP_API.h"
+#else
 #ifdef P2P_BIZ_LIB
 #include "XQ_Global.h"
 #include "XQ_Type.h"
@@ -37,8 +41,8 @@
 #include "PPPP_Type.h"
 #include "PPPP_Error.h"
 #include "PPPP_API.h"
-
 #include "biz.h"
+#endif
 #endif
 #endif
 
@@ -376,6 +380,8 @@ int P2P_init( void )
 
 #elif defined (OLD_KERNEL_XDBL) || defined(NEW_KERNEL_XDBL)
     pServerString = (char *)"HZLXPHPGLKSYPIHUPDTALQEEPKLRIHLNLUPEAOEPLOSQHXENEJPAHYIALSERIBEKLKICIEHUEIELEGEEEHEOEM-$$";
+#elif defined (PREFIX_8433)
+	pServerString = (char *)"HZLXPHPGLKSYPIHUPDTALQEEPKLRIHLNLUPEAOEPLOSQHXENEJPAHYIALSERIBEKLKICIEHUEIELEGEEEHEOEM-$$";
 
 #else
     pServerString = (char *)"EJTDHXEHIASQARSTEIPAPHATLKASPDEKPNLNLTAUHUHXSULVEESVSWAOEHPKLULXARSTPGSQPDLNPEPALRPFLKLOLQLP-$$";
@@ -388,10 +394,15 @@ int P2P_init( void )
 
 #else
 #ifdef PPCS_AES_P2P
+#if defined (UK_CUSTOMERS_OLD_KERNEL)|| defined (UK_CUSTOMERS_NEW_KERNEL)
     pServerString = (char *)("EFGHFDBMKDIHGEJDEBHLFBEPGHNEHCMEHLFFBNDCAIJOKOKDDDBLDEPEHAKGIOKCBFNFKPCLPBNIAA");//英国客户善云新字符串
+#elif defined (PREFIX_8433)
+	//使用亮点的尚云服务器
+	pServerString = (char *)("EBGAEIBIKHJJGFJJEEHOFAENHLNBHGNMHMFDAADAAOJNKNKGDNAPDJPIGAKOIHLBBJNMKLDIPENJBKDE");
+#endif
 #else
-    /
-#ifdef 0//PPCS_P2P_TEST
+
+#if 0 //PPCS_P2P_TEST
     pServerString = (char *)("EBGAEIBIKHJJGFJJEEHOFAENHLNBHGNMHMFDAADAAOJNKNKGDNAPDJPIGAKOIHLBBJNMKLDIPENJBKDE");//test
 #else
     P2PTextout( "USE OBJECT SERVER, OLD LIB" );
@@ -401,6 +412,7 @@ int P2P_init( void )
         pServerString = "BPGBBOEOKJMBHJNCFFDFAEEJCMMHDANKDFADBNHDBGJMLDLOCIACCJOPHMLCJPKJABMELOCMOCJKABHGIANGNPBLIPOIFPCPAIGJDCFDMMLCEFHLACBDPGNA";
     }
 #endif
+
 #endif
 
 #endif
@@ -425,7 +437,7 @@ int P2P_init( void )
     PPPP_Share_Bandwidth( 1 );
     Textout("*********************************************");
 
-#ifdef LDPUSH
+#if defined (LDPUSH) || defined (FCM_PUSH)
     bEnablePush = 1;
 #endif
 
@@ -5108,6 +5120,9 @@ int OnDoorP2PAlarm(int sit, char *szid, int type)
 #endif
 
     //Only Call and Alarm
+    /* modify begin by yiqing, 2016-07-07 */
+	//Only Alarm
+	#if 0
     if ( type == BELL_ALARM || type == BELL_CALL ) {
         char szTitle[128] = {0};
         if ( type == BELL_ALARM )
@@ -5115,8 +5130,15 @@ int OnDoorP2PAlarm(int sit, char *szid, int type)
         else
             sprintf(szTitle, "Calling,%s", temp + sizeof(head));
 
-        //MsgPush(bparam.stIEBaseParam.dwDeviceID, szTitle);
+        MsgPush(bparam.stIEBaseParam.dwDeviceID, szTitle);
     }
+	#else
+	if ( type == BELL_ALARM ) {
+        char szTitle[128] = {0};
+        sprintf(szTitle, "Alarming,%s", temp + sizeof(head));
+        MsgPush(bparam.stIEBaseParam.dwDeviceID, szTitle);
+    }
+	#endif
 
     return 1;
 }
@@ -6760,7 +6782,7 @@ void CallbackWaitingAgree(unsigned int sit)
         OnDoorP2PAlarm(index, szCallTime, BELL_AGREE_ME );
 #endif
 #ifdef LDPUSH
-        LdPush("Other clients have been answered",0);
+        LdPush("Other clients have been answered",0);//Another user has answered
 #endif
         //Close Other
         for(sit2=0; sit2<MAX_P2P_CONNECT; sit2++) {
@@ -6833,6 +6855,10 @@ void CallbackWaitingAgree(unsigned int sit)
             }
         }
         UnRegisterBaSysCallback(0xFF, CallbackWaitingAgree);
+		/* add begin by yiqing, 2016-07-13*/
+		//防止出现在室内机叮咚已经开锁的情况下，室外机无限循环播放呼叫声音
+		StopAudioPlay();
+		
         bStartCall = FALSE;
 #if defined (ZHENGSHOW)
         DisableIR(0);
@@ -7040,6 +7066,9 @@ void OnCall()
     char szTitle[128] = {0};
     sprintf(szTitle, "%s,%s,%d", szCallTime,bparam.stIEBaseParam.dwDeviceID,BELL_CALL);
     MsgPush(bparam.stIEBaseParam.dwDeviceID, szTitle);
+	memset(szTitle,0,sizeof(szTitle));
+	sprintf(szTitle, "calling,%s,%s,%d", szCallTime,bparam.stIEBaseParam.dwDeviceID,BELL_CALL);
+	FcmPush(szTitle);
 #endif
 
 #ifdef  FACTOP
@@ -7444,6 +7473,153 @@ int P2PCheckSessionState( int sit, short cmd )
 }
 #endif
 
+#ifdef FCM_PUSH
+int fcmRegister(int sit,short cmd)
+{
+    Textout("pushregister");
+
+    int     byPri = 0;
+    int     iRet = 0;
+    char    szValue[64] = {0};
+    int     nRetValue = 0;
+
+    char bUpdateFlag = 0;
+    unsigned char index = MAX_PUSH_SIZE;
+
+    int validity = 0;
+
+    char    apiKey[40] = {0};
+    char    token[170] = {0};
+
+    unsigned char*  pparam = p2pstream[sit].buffer + sizeof( CMDHEAD );
+
+    byPri = CheckP2pPri( sit );
+
+    if ( byPri == 0x00 ) {
+        nRetValue = -1;
+        goto loop;
+    }
+
+	//注册保留时间，如果超过此时间不刷新，则删除该注册信息
+    iRet= GetIntParamValueEx(pparam,"validity",&validity);
+    if(0 == iRet) {
+        fcmparamlist.validity= validity;
+    } else {
+        if( 0 == fcmparamlist.validity) {
+            fcmparamlist.validity = 168;//默认为168个小时一个星期
+        }
+    }
+    Textout("fcm validity=%d",fcmparamlist.validity);
+
+
+
+    iRet = GetStrParamValueEx(pparam,"token",token);
+    if(iRet ==0 && token[0]!= 0) {
+        int i;
+        for(i = 0;  i< MAX_PUSH_SIZE; i++) {
+            if(strcmp(fcmparamlist.stgcmParam[i].token,token) == 0) {
+                Textout("this fcm token has exit,update validity on index:%d",i);
+                bUpdateFlag = 1;
+                index = i;
+                break;
+            }
+        }
+
+        if(0 == bUpdateFlag) {
+            for(i = 0; i < MAX_PUSH_SIZE; i++) {
+                if(fcmparamlist.stgcmParam[i].registerTime + (fcmparamlist.validity*3600) < time(NULL)) {
+					strcpy(&fcmparamlist.stgcmParam[i].token,token);
+                    Textout("this index has not device or the device has expired, regidter the index:%d",i);
+                    index = i;
+                    break;
+                }
+            }
+            if(index >= MAX_PUSH_SIZE) {
+                Textout("Full registration");
+                nRetValue = -3;
+                WriteFcmParams();
+                goto loop;
+            }
+        }
+
+        if(fcmparamlist.stgcmParam[index].registerTime < time(NULL)) {
+            fcmparamlist.stgcmParam[index].registerTime = time(NULL);
+            Textout("time[%d]:%d",index,fcmparamlist.stgcmParam[index].registerTime);
+        }
+
+        iRet = GetStrParamValueEx( pparam, "apiKey", apiKey );
+        if ( iRet == 0 && apiKey[0] != 0 ) {
+            strcpy(&fcmparamlist.stgcmParam[index].apiKey,apiKey);
+        }
+    }
+    WriteFcmParams();
+loop:
+    sprintf(szValue, "result=%d;\r\n", nRetValue);
+    iRet = P2PSendBack( sit, cmd, szValue, 0 );
+
+    if ( iRet < 0 ) {
+        PopP2pSocket( p2pstream[sit].socket );
+        return -1;
+    }
+	
+    return 0;
+}
+
+int fcmDelete(int sit,short cmd)
+{
+    Textout("FcmDelete");
+    int     byPri = 0;
+    int     iRet = 0;
+    char    szValue[64] = {0};
+    int     nRetValue = 0;
+
+    char    bFlag = 0;
+
+    char    token[170] = {0};
+
+
+    unsigned char*  pparam = p2pstream[sit].buffer + sizeof( CMDHEAD );
+
+    byPri = CheckP2pPri( sit );
+
+    if ( byPri == 0x00 ) {
+        nRetValue = -1;
+        goto loop;
+    }
+
+    iRet = GetStrParamValueEx(pparam,"token",token);
+    if(iRet ==0 && token[0]!= 0) {
+        int index;
+        for(index = 0;  index< MAX_PUSH_SIZE; index++) {
+            if(strcmp(fcmparamlist.stgcmParam[index].token,token) == 0) {
+                memset(&fcmparamlist.stgcmParam[index],0,sizeof(GCMPARAM));
+                Textout("delete push whith index:%d success",index);
+                bFlag = 1;
+                WriteFcmParams();
+                break;
+            }
+        }
+        if(0 == bFlag) {
+            nRetValue = -3;
+        }
+    } else {
+        nRetValue = -2;
+    }
+
+loop:
+    sprintf(szValue, "result=%d;\r\n", nRetValue);
+    iRet = P2PSendBack( sit, cmd, szValue, 0 );
+
+    if ( iRet < 0 ) {
+        PopP2pSocket( p2pstream[sit].socket );
+        return -1;
+    }
+
+    return 0;
+
+}
+
+#endif
 #ifdef LDPUSH
 int pushRegister(int sit,short cmd)
 {
@@ -7687,6 +7863,7 @@ int pushDelete(int sit,short cmd)
         int index;
         for(index = 0;  index< MAX_PUSH_SIZE; index++) {
             if(strcmp(pushparamlist.stXPushParam[index].device_token,device_token) == 0) {
+				memset(&pushparamlist.stJPushParam[index],0,sizeof(JPUSHPARAM));
                 memset(&pushparamlist.stXPushParam[index],0,sizeof(XPUSHPARAM));
                 memset(&pushparamlist.stYPushParam[index],0,sizeof(YPUSHPARAM));
                 pushparamlist.environment[index] = 0;
@@ -10281,6 +10458,21 @@ int p2pcmdfind( int sit )
 #endif
     /* add end by yiqing, 2015-05-28 */
 
+#ifdef FCM_PUSH
+pdst = strstr( pcmd, "/fcm_register.cgi" );
+
+if ( pdst != NULL ) {
+	return fcmRegister( sit, CGI_P2PRegisterFcm);
+}
+
+pdst = strstr( pcmd, "/fcm_delete.cgi" );
+
+if ( pdst != NULL ) {
+	return fcmDelete( sit, CGI_P2PDeleteFcm);
+}
+
+#endif
+
     return -1;
 }
 
@@ -10298,11 +10490,11 @@ void* p2plistenThreadProc( void* p )
     P2P_init();
     while ( 1 ) {
         if ( ( strlen( bparam.stIEBaseParam.dwDeviceID ) == 0 ) || ( bparam.stIEBaseParam.dwDeviceID[0] == 0x00 ) ) {
-            sleep( 3 );
+			printf("dwDeviceID is null\n");
+			sleep( 3 );
             continue;
         }
 #ifdef PPCS_API
-        //handle = PPPP_Listen( bparam.stIEBaseParam.dwDeviceID, 300, 0, 1,"HRMPGZ" );//test
         handle = PPPP_Listen( bparam.stIEBaseParam.dwDeviceID, 300, 0, 1,bparam.stIEBaseParam.dwApiLisense);
         Textout("ApiLisense = %s",bparam.stIEBaseParam.dwApiLisense);
 #else

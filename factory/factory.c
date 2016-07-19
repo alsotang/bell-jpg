@@ -371,7 +371,25 @@ void ConfigVersion( void )
 	//define PPCS_AES_P2P
 	//define NEW_BRAOD_AES
 	//4.5.12.21
-	nVersion = 20;
+
+	/* add begin by yiqing, 2016-07-14*/
+	//undefine NEW_BRAOD_AES
+	//使用张生福老库
+	//4.5.12.22
+
+	/* add begin by yiqing, 2016-07-14*/
+	//使用张生福新库
+	//undefine NEW_BRAOD_AES
+	//4.5.11.22
+
+	/* add begin by yiqing, 2016-07-19*/
+	//define FCM_PUSH
+	//4.5.11.23
+
+	/* add begin by yiqing, 2016-07-19*/
+	//sync
+	//4.5.12.23
+	nVersion = 23;
 
 #elif defined (PREFIX_OBJ)  //new kernel
     /* add begin by yiqing, 2015-06-11, 原因: */
@@ -445,10 +463,25 @@ void ConfigVersion( void )
     //define SUPPORT_FM34
     //define SUPPORT_IRCUT
 
-    /* add begin by yiqing, 2016-05-07,test*/
-    //4.7.12.28
-    
-    nVersion = 28;
+    /* add begin by yiqing, 2016-07-06*/
+	//undefine SUPPORT_FM34
+	//undefine SUPPORT_IRCUT
+    //4.7.11.28
+
+	/* add begin by yiqing, 2016-07-08*/
+	//sync
+	//4.7.12.29
+    //define SUPPORT_FM34
+    //define SUPPORT_IRCUT
+
+	/* add begin by yiqing, 2016-07-12*/
+	//sync
+	//4.7.11.29
+
+	/* add begin by yiqing, 2016-07-15*/
+	//4.7.11.30
+	//gcm fcm
+    nVersion = 30;
 
 #elif defined (OLD_KERNEL_XDBL)
     //4.8.12.10
@@ -474,6 +507,13 @@ void ConfigVersion( void )
     //测试aes新字符串新id
     //4.10.11.13
     nVersion = 13;
+
+#elif defined (PREFIX_8433)
+	/* add begin by yiqing, 2016-07-08*/
+	//使用亮点科技的尚云服务器
+	//8433
+	//4.10.21.10
+	nVersion = 10;
 #endif
 
 #endif

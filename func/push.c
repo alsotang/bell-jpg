@@ -29,9 +29,8 @@ typedef unsigned int uint32;
 #define	true  TRUE
 sem_t pushsem;
 
-char pushDataBuf[128] = {0};
+static char pushDataBuf[128] = {0};
 char pushType = 0;
-
 
 uint32 _state[4];	/* state (ABCD) */
 uint32 _count[2];	/* number of bits, modulo 2^64 (low-order word first) */
@@ -580,7 +579,7 @@ int JPush(char *sendData,unsigned char index)
 		}
 		else if(0 == pushType)
 		{
-			return;
+			return -2;
 		}
 		receiver_type = 5;
 
@@ -699,7 +698,7 @@ int XgPush(char *sendData,unsigned char index)
 	{
 		if(0 == pushType)
 		{
-			return;
+			return -2;
 		}
 		sprintf(message,"{\"content\":\"%s\",\"title\":\"calling\", \"vibrate\":1}",sendData);
 		environment = 0;
@@ -827,12 +826,13 @@ int YunPush(char * sendData,unsigned char index)
     char base_string[1024] = {0};
     char params[2048] = {0};
     char urlStr[1024] = {0};
+    Textout("yPush index:%d",index);
 
 	if(1 == pushparamlist.devicetype[index])
 	{
 		if(0 == pushType)
 		{
-			return;
+			return -2;
 		}
 		sprintf(msg,"{\"title\":\"calling\",\"description\":\"%s\"}" , sendData);
 		device_type = 3;
@@ -852,7 +852,7 @@ int YunPush(char * sendData,unsigned char index)
 
     //sprintf(msg,"{\"aps\":{\"alert\":\"%s\",\"badge\":1,\"sound\":\"null\"}}" , sendData);
 	
-    Textout("yPush index:%d",index);
+
 
     strcpy(apikey,pushparamlist.stYPushParam[index].apikey);
     strcpy(secret_key,pushparamlist.stYPushParam[index].secret_key);
@@ -963,16 +963,14 @@ int LdPush(char *data,char type)
 	memset(pushDataBuf,0,sizeof(pushDataBuf));
     strcpy(pushDataBuf,data);
     //strcpy(pushDataBuf,"ld push alarm...");
-    pushType = type;
+    pushType = type;//1:呼叫推送  0:其他客户端已接听，则推一个静音的消息给客户端
 	NotifyToPush();
     return 0;
 }
 
 void *pushThreadProc(void *p)
-
 {
     Textout("-----------pushThreadProc--------------");
-
 	
 	int res   = -1;
 	res = sem_init(&pushsem, 0, 0);  
@@ -1057,20 +1055,18 @@ void *pushThreadProc(void *p)
 	            }
 	        }
 	    }
-
+		
 	    Textout("sendtotalNum:%d,    sendsuccessNum:%d",sendTotalNum,sendSuccessNum);
     }
-    //return sendSuccessNum;
 }
 
-#endif
+
 
 void LdPushStart()
 {
 	pthread_t pushthread;
-
 	pthread_create( &pushthread, 0, &pushThreadProc, NULL );
-
 }
 
+#endif
 

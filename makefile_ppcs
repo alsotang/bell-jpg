@@ -74,6 +74,10 @@ CFLAGS += -DSENSOR_3861
 #
 #CFLAGS += -DSENSOR_8433
 #####################################################
+#socket mail surpport SSL
+CFLAGS += -DHAVE_SSL
+OPENSSL = -L/mnt/hgfs/project/library/mailx/ssl/lib -lssl -lcrypto
+#####################################################
 
 export
 unexport SUBDIRS

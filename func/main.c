@@ -136,6 +136,20 @@ void NetworkInitOK()
 	InitDownloadModule();
     #endif    
 
+#ifdef JPUSH
+    ReadJPushParams();
+#endif
+
+#ifdef FCM_PUSH
+	ReadFcmParams();
+	gcmStart();
+#endif
+
+#ifdef LDPUSH
+    ReadPushParams();
+	LdPushStart();
+#endif
+
     NetCmdStart();
     DnsStart();
     UpnpStart();
@@ -270,14 +284,7 @@ int main( void )
 	#endif
 
 	SytemStartupLed();
-    #ifdef JPUSH
-    ReadJPushParams();
-    #endif
 
-    #ifdef LDPUSH
-    ReadPushParams();
-	LdPushStart();
-    #endif
     
 	if ( !ExistGpsFile())
 	{

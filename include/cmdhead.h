@@ -269,6 +269,10 @@ typedef struct _IPCCMDPARAM
 /* add begin by yiqing, 2015-07-31, ‘≠“Ú: */
 #define CGI_P2PDeleteBellLog       0X607F
 
+#define CGI_P2PRegisterFcm        0x6080
+#define CGI_P2PDeleteFcm          0x6081
+
+
 #define RECORD_MOVE		0x01
 #define RECORD_SUSPEND		0x02
 #define RECORD_RESUME		0x03

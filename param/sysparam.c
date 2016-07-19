@@ -47,6 +47,8 @@ char ypush_address[16] = {0};
 char bEnablePush = 0;
 //#endif 
 
+GCMPARAMLIST fcmparamlist;
+
 int bPIRStatus = 0;
 
 pthread_mutex_t filemutex = PTHREAD_MUTEX_INITIALIZER;
@@ -104,6 +106,48 @@ void WritePushParams(void)
 }
 #endif
 
+#ifdef FCM_PUSH
+
+void WriteFcmParams(void)
+{
+	Textout("WriteFcmParams");
+	FILE*	 fp = NULL;
+	fp = fopen( "/param/fcmparamlist.bin", "wb" );
+
+	if ( fp )
+	{
+		fwrite( &fcmparamlist, 1, sizeof( GCMPARAMLIST ), fp );
+		DoSystem("sync");
+		fclose( fp );
+	}
+	else
+	{
+		Textout("/param/fcmparamlist.bin not exit");
+	}
+}
+
+void ReadFcmParams(void)
+{
+	Textout("ReadFcmParams");
+
+	FILE*	fp = NULL;
+
+	if(access("/param/fcmparamlist.bin", F_OK) == -1)
+	{
+		Textout("fcmparamlist.bin not exit");
+		memset( &fcmparamlist,0x00,sizeof( GCMPARAMLIST));
+		WriteFcmParams();
+	}
+	
+	memset( &fcmparamlist,0x00,sizeof( GCMPARAMLIST));
+	fp = fopen( "/param/fcmparamlist.bin","rb");
+	if( fp)
+	{
+		fread( &fcmparamlist,1,sizeof ( GCMPARAMLIST ),fp);
+		fclose ( fp );
+	}
+}
+#endif
 
 #ifdef JPUSH
 void ReadJPushParams(void)

@@ -77,6 +77,7 @@ ENCODER_OBJS = 	\
 		$(NVS_PATH)/func/Bell-timer.o                        \
 		$(NVS_PATH)/func/jPush.o                        \
 		$(NVS_PATH)/func/push.o                        \
+		$(NVS_PATH)/func/gcm.o                        \
 
 ENCODER_OBJS	+=	\
 		$(NVS_PATH)/p2p/p2p.o			\
@@ -97,7 +98,7 @@ all: encoder
 
 encoder: $(ENCODER_OBJS);
 	@echo "create executable file: $@ ..."
-	$(CCC) -I../include -I../web -lpthread -lm -o $@ $^  $(TUTK_LIB) $(P2P_OBJS) $(NVRAM_OBJS) $(ENCRPT_LIBS) $(WEB_OBJS) $(WPS_LIB) $(OBJ_LIB)  $(SENSOR_LIB) $(LIBWIFI)
+	$(CCC) -I../include -I../web -lpthread -lm $(OPENSSL) -o $@ $^  $(TUTK_LIB) $(P2P_OBJS) $(NVRAM_OBJS) $(ENCRPT_LIBS) $(WEB_OBJS) $(WPS_LIB) $(OBJ_LIB)  $(SENSOR_LIB) $(LIBWIFI)
 	@echo "create executable file end"
 #$(ENCODER_OBJS)
 	mipsel-linux-strip encoder
