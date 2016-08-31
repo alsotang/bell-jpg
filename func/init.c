@@ -100,13 +100,11 @@ void SensorInit( void ) 			//sensor init
     InsmodUvcDriver();
 #endif
 
-    //sleep(10);
+    sleep(2);
 
-/* BEGIN: Added by yiqing, 2015/4/22 */
-#ifdef BAFANGDIANZI
-	bparam.stVencParam.bysize = 1;	//QVGA
-	//bparam.stVencParam.byframerate = 100;
-	bparam.stVencParam.byframerate = 15;
+#ifdef PREFIX_8433
+	bparam.stVencParam.bysize = 0;	
+	bparam.stVencParam.byframerate = 10;
 #else
 	bparam.stVencParam.bysize = 1;	//QVGA
 	bparam.stVencParam.byframerate = 15;

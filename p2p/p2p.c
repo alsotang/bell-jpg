@@ -381,7 +381,7 @@ int P2P_init( void )
 #elif defined (OLD_KERNEL_XDBL) || defined(NEW_KERNEL_XDBL)
     pServerString = (char *)"HZLXPHPGLKSYPIHUPDTALQEEPKLRIHLNLUPEAOEPLOSQHXENEJPAHYIALSERIBEKLKICIEHUEIELEGEEEHEOEM-$$";
 #elif defined (PREFIX_8433)
-	pServerString = (char *)"HZLXPHPGLKSYPIHUPDTALQEEPKLRIHLNLUPEAOEPLOSQHXENEJPAHYIALSERIBEKLKICIEHUEIELEGEEEHEOEM-$$";
+    pServerString = (char *)"HZLXPHPGLKSYPIHUPDTALQEEPKLRIHLNLUPEAOEPLOSQHXENEJPAHYIALSERIBEKLKICIEHUEIELEGEEEHEOEM-$$";
 
 #else
     pServerString = (char *)"EJTDHXEHIASQARSTEIPAPHATLKASPDEKPNLNLTAUHUHXSULVEESVSWAOEHPKLULXARSTPGSQPDLNPEPALRPFLKLOLQLP-$$";
@@ -396,14 +396,10 @@ int P2P_init( void )
 #ifdef PPCS_AES_P2P
 #if defined (UK_CUSTOMERS_OLD_KERNEL)|| defined (UK_CUSTOMERS_NEW_KERNEL)
     pServerString = (char *)("EFGHFDBMKDIHGEJDEBHLFBEPGHNEHCMEHLFFBNDCAIJOKOKDDDBLDEPEHAKGIOKCBFNFKPCLPBNIAA");//英国客户善云新字符串
-#elif defined (PREFIX_8433)
-	//使用亮点的尚云服务器
-	pServerString = (char *)("EBGAEIBIKHJJGFJJEEHOFAENHLNBHGNMHMFDAADAAOJNKNKGDNAPDJPIGAKOIHLBBJNMKLDIPENJBKDE");
+#elif defined (PREFIX_8433) || defined(PREFIX_FM34_PPCS)
+    //使用亮点的尚云服务器
+    pServerString = (char *)("EBGAEIBIKHJJGFJJEEHOFAENHLNBHGNMHMFDAADAAOJNKNKGDNAPDJPIGAKOIHLBBJNMKLDIPENJBKDE");
 #endif
-#else
-
-#if 0 //PPCS_P2P_TEST
-    pServerString = (char *)("EBGAEIBIKHJJGFJJEEHOFAENHLNBHGNMHMFDAADAAOJNKNKGDNAPDJPIGAKOIHLBBJNMKLDIPENJBKDE");//test
 #else
     P2PTextout( "USE OBJECT SERVER, OLD LIB" );
     pServerString = ReadServerString(SS_P2P);
@@ -412,19 +408,15 @@ int P2P_init( void )
         pServerString = "BPGBBOEOKJMBHJNCFFDFAEEJCMMHDANKDFADBNHDBGJMLDLOCIACCJOPHMLCJPKJABMELOCMOCJKABHGIANGNPBLIPOIFPCPAIGJDCFDMMLCEFHLACBDPGNA";
     }
 #endif
-
-#endif
-
 #endif
     Textout("p2pServerSrting:%s",pServerString);
 
-	iRet = PPPP_Initialize(pServerString);	
-	Textout("P2P ServerString = [%s]", pServerString);	
-	if ( iRet != ERROR_PPPP_SUCCESSFUL )	
-	{		 
-		printf( "error initialize iRet %d\n", iRet );			
-	}		
-	Textout("----------P2P_Init Return = %d", iRet);
+    iRet = PPPP_Initialize(pServerString);
+    Textout("P2P ServerString = [%s]", pServerString);
+    if ( iRet != ERROR_PPPP_SUCCESSFUL ) {
+        printf( "error initialize iRet %d\n", iRet );
+    }
+    Textout("----------P2P_Init Return = %d", iRet);
 
 
     iRet = PPPP_NetworkDetect( &param, 0 );
@@ -522,15 +514,15 @@ int P2PGetUserPri( int sit, char* loginuse, char* loginpas )
             if ( !strcmp( bparam.stBell.pwd[i], passwd) ) {
                 if ( bUserExisted(sit, i + 1) ) {
                     pri = -1;   //Already Used
-
-                    /* BEGIN: Added by wupm(2073111@qq.com), 2014/7/2 */
                     break;
                 }
 
-                if ( bparam.stBell.admin == i + 1 )
+                if ( bparam.stBell.admin == i + 1 ) {
                     pri = ( i + 1 ) + 100;
-                else
+                } else {
                     pri = i + 1;
+                }
+
 
                 break;
             } else {
@@ -544,6 +536,30 @@ int P2PGetUserPri( int sit, char* loginuse, char* loginpas )
     return pri;
 }
 #endif
+
+/* add begin by yiqing, 2016-07-25*/
+//同一台手机有一个唯一的token，如果同一台手机由于切换网络的的原因前一个p2p链接还没推出
+//那新连接就会出现其他用户已连接的问题，现在判断如果是同一个token的话就主动断开前一个连接
+int CheckP2pSitFromToken(int token)
+{
+    int i ,sit;
+
+    for ( i = 0; i < MAX_USER; i++ ) {
+        if(token == bparam.stBell.userToken[i]) {
+            for(sit=0; sit<MAX_P2P_CONNECT; sit++ ) {
+                if ( p2pstream[sit].socket != -1 && p2pstream[sit].nIndex == (i +1) ) {
+                    return sit;
+                }
+            }
+            printf("can't find the sit use the token\n");
+            return -1;
+        }
+    }
+
+    printf("there is no the same token=%d\n",token);
+    return -1;
+}
+/* add end by yiqing, 2016-07-25 */
 
 /* BEGIN: Modified by wupm(2073111@qq.com), 2014/6/28 */
 //Return
@@ -594,15 +610,12 @@ int CheckP2pPri( int sit )
     } else if ( iRet > 0 ) {
         p2pstream[sit].nIndex = iRet;
     }
-    //Textout("========TEST 2======");
 
     /* BEGIN: Add New CGI: get_doorbelllogs.cgi */
     /*        Added by wupm(2073111@qq.com), 2014/8/12 */
 #ifdef  ENABLE_BELL_LOG
     strcpy(p2pstream[sit].szUser, usertemp);
 #endif
-
-    //Textout("========TEST 3======");
 
     //P2PTextout("CheckP2P, return = %d, nUserIndex = %d, Connect Index = %d, socket = %d",
     //  iRet, p2pstream[sit].nIndex, sit, p2pstream[sit].socket);
@@ -4399,11 +4412,12 @@ int p2psetwifiscan( int sit, short cmd )
 int p2pcheckuser( int sit, short cmd )
 {
     unsigned char       temp[2048];
-    int                     len = 0;
-    int                     byPri = 0;
+    int                 len = 0;
+    int                 byPri = 0;
     CMDHEAD             head;
-    int                     iRet;
-    unsigned char*       pparam = p2pstream[sit].buffer + sizeof( CMDHEAD );
+    int                 iRet;
+    int                 userToken = 0;
+    unsigned char*      pparam = p2pstream[sit].buffer + sizeof( CMDHEAD );
     memset( temp, 0x00, 2048 );
     byPri = CheckP2pPri( sit );
     //0=ERROR
@@ -4433,10 +4447,38 @@ int p2pcheckuser( int sit, short cmd )
         return 0;
     }
 
+    /* add begin by yiqing, 2016-07-25*/
+	iRet = GetIntParamValue( pparam, "token", &userToken );
+    if((0 == iRet)  && (userToken != 0)) {
+        printf("token = %d\n",userToken);
+        if ( byPri == -1 ) {
+            printf("CheckP2pSitFromToken token=%d\n",userToken);
+            int presit = CheckP2pSitFromToken(userToken);
+            if(presit !=-1) {
+                printf("PopP2pSocket [%d]\n",presit);
+                PopP2pSocket( p2pstream[presit].socket );
+                byPri = 1;
+            }
+        } else if(byPri >0) {
+
+            int index = p2pstream[sit].nIndex -1;
+            if(index >=0 && index <MAX_P2P_CONNECT) {
+                printf("set bparam.stBell.userToken[%d] = %d\n",index,userToken);
+                bparam.stBell.userToken[index] = userToken;
+            }
+
+        }
+    }
+
+
+    /* add end by yiqing, 2016-07-25 */
+
     /* BEGIN: Added by yiqing, 2015/4/14 */
 #ifndef BAFANGDIANZI
     /* BEGIN: Added by wupm(2073111@qq.com), 2014/6/25 */
     if ( byPri == -1 ) {
+
+
         CMDHEAD head;
         char    result[64];
         memset( result, 0x00, 64 );
@@ -4514,7 +4556,7 @@ int p2pcheckuser( int sit, short cmd )
 
 int p2prestorefactory( int sit, short cmd )
 {
-#if 0
+#if 1
     unsigned char   temp[2048];
     int             len = 0;
     int             byPri = 0;
@@ -4537,9 +4579,7 @@ int p2prestorefactory( int sit, short cmd )
         sprintf( temp + sizeof( CMDHEAD ), "%s", result );
         memcpy( temp, &head, sizeof( CMDHEAD ) );
         len = head.len + sizeof( CMDHEAD );
-        iRet = p2p_write( sit, P2P_CMDCHANNEL, temp, len );
-
-//        iRet = PPPP_WriteEx(p2pstream[sit].socket,P2P_CMDCHANNEL,temp,len);
+        iRet = PPPP_WriteEx(p2pstream[sit].socket,P2P_CMDCHANNEL,temp,len);
         if ( iRet < 0 ) {
             PopP2pSocket( p2pstream[sit].socket );
             return -1;
@@ -4555,11 +4595,18 @@ int p2prestorefactory( int sit, short cmd )
 #endif
 #endif
 
-    //camera param groups
-    /* BEGIN: Modified by wupm, 2013/1/29   Version:117 */
-    //DoSystem( "rm /param/system.ini" );
-    DoSystem( "rm /system/www/system.ini" );
+
+	Textout("p2prestorefactory");
+	DoSystem( "rm /system/www/BellParam.bin" );
+
+#ifdef LDPUSH
+    DoSystem( "rm /param/pushparamlist.bin" );
+#endif
+#ifdef FCM_PUSH
+	DoSystem( "rm /param/fcmparamlist.bin" );
+#endif
     SetRebootCgi();
+
 #endif
     /* BEGIN: Added by wupm, 2013/7/1 */
     return 0;
@@ -5121,8 +5168,8 @@ int OnDoorP2PAlarm(int sit, char *szid, int type)
 
     //Only Call and Alarm
     /* modify begin by yiqing, 2016-07-07 */
-	//Only Alarm
-	#if 0
+    //Only Alarm
+#if 0
     if ( type == BELL_ALARM || type == BELL_CALL ) {
         char szTitle[128] = {0};
         if ( type == BELL_ALARM )
@@ -5132,13 +5179,13 @@ int OnDoorP2PAlarm(int sit, char *szid, int type)
 
         MsgPush(bparam.stIEBaseParam.dwDeviceID, szTitle);
     }
-	#else
-	if ( type == BELL_ALARM ) {
+#else
+    if ( type == BELL_ALARM ) {
         char szTitle[128] = {0};
         sprintf(szTitle, "Alarming,%s", temp + sizeof(head));
         MsgPush(bparam.stIEBaseParam.dwDeviceID, szTitle);
     }
-	#endif
+#endif
 
     return 1;
 }
@@ -6781,6 +6828,9 @@ void CallbackWaitingAgree(unsigned int sit)
         P2PTextout("OK, %d Channel Agree, Send BELL_AGREE_ME", index);
         OnDoorP2PAlarm(index, szCallTime, BELL_AGREE_ME );
 #endif
+#ifdef FCM_PUSH
+        FcmPush("Call answered by another user");
+#endif
 #ifdef LDPUSH
         LdPush("Other clients have been answered",0);//Another user has answered
 #endif
@@ -6855,10 +6905,10 @@ void CallbackWaitingAgree(unsigned int sit)
             }
         }
         UnRegisterBaSysCallback(0xFF, CallbackWaitingAgree);
-		/* add begin by yiqing, 2016-07-13*/
-		//防止出现在室内机叮咚已经开锁的情况下，室外机无限循环播放呼叫声音
-		StopAudioPlay();
-		
+        /* add begin by yiqing, 2016-07-13*/
+        //防止出现在室内机叮咚已经开锁的情况下，室外机无限循环播放呼叫声音
+        StopAudioPlay();
+
         bStartCall = FALSE;
 #if defined (ZHENGSHOW)
         DisableIR(0);
@@ -7026,6 +7076,10 @@ void OnCall()
     char szPath[64] = {0};
     int t = 0;
 
+#ifdef POWER_SAVE_MODE
+	StartVideoCaptureEx();
+#endif
+
 #if defined (FEEDDOG) || defined (FUHONG)
     if(IsRedIrEffective())
         OnIROpen();
@@ -7066,9 +7120,9 @@ void OnCall()
     char szTitle[128] = {0};
     sprintf(szTitle, "%s,%s,%d", szCallTime,bparam.stIEBaseParam.dwDeviceID,BELL_CALL);
     MsgPush(bparam.stIEBaseParam.dwDeviceID, szTitle);
-	memset(szTitle,0,sizeof(szTitle));
-	sprintf(szTitle, "calling,%s,%s,%d", szCallTime,bparam.stIEBaseParam.dwDeviceID,BELL_CALL);
-	FcmPush(szTitle);
+    memset(szTitle,0,sizeof(szTitle));
+    sprintf(szTitle, "calling,%s,%s,%d", szCallTime,bparam.stIEBaseParam.dwDeviceID,BELL_CALL);
+    FcmPush(szTitle);
 #endif
 
 #ifdef  FACTOP
@@ -7178,8 +7232,6 @@ void StartCall()
 
     if ( !bStartCall ) {
         bStartCall = TRUE;
-
-
 
         OnCall();
     } else {
@@ -7500,7 +7552,7 @@ int fcmRegister(int sit,short cmd)
         goto loop;
     }
 
-	//注册保留时间，如果超过此时间不刷新，则删除该注册信息
+    //注册保留时间，如果超过此时间不刷新，则删除该注册信息
     iRet= GetIntParamValueEx(pparam,"validity",&validity);
     if(0 == iRet) {
         fcmparamlist.validity= validity;
@@ -7528,7 +7580,7 @@ int fcmRegister(int sit,short cmd)
         if(0 == bUpdateFlag) {
             for(i = 0; i < MAX_PUSH_SIZE; i++) {
                 if(fcmparamlist.stgcmParam[i].registerTime + (fcmparamlist.validity*3600) < time(NULL)) {
-					strcpy(&fcmparamlist.stgcmParam[i].token,token);
+                    strcpy(&fcmparamlist.stgcmParam[i].token,token);
                     Textout("this index has not device or the device has expired, regidter the index:%d",i);
                     index = i;
                     break;
@@ -7561,7 +7613,7 @@ loop:
         PopP2pSocket( p2pstream[sit].socket );
         return -1;
     }
-	
+
     return 0;
 }
 
@@ -7863,7 +7915,7 @@ int pushDelete(int sit,short cmd)
         int index;
         for(index = 0;  index< MAX_PUSH_SIZE; index++) {
             if(strcmp(pushparamlist.stXPushParam[index].device_token,device_token) == 0) {
-				memset(&pushparamlist.stJPushParam[index],0,sizeof(JPUSHPARAM));
+                memset(&pushparamlist.stJPushParam[index],0,sizeof(JPUSHPARAM));
                 memset(&pushparamlist.stXPushParam[index],0,sizeof(XPUSHPARAM));
                 memset(&pushparamlist.stYPushParam[index],0,sizeof(YPUSHPARAM));
                 pushparamlist.environment[index] = 0;
@@ -10459,17 +10511,17 @@ int p2pcmdfind( int sit )
     /* add end by yiqing, 2015-05-28 */
 
 #ifdef FCM_PUSH
-pdst = strstr( pcmd, "/fcm_register.cgi" );
+    pdst = strstr( pcmd, "/fcm_register.cgi" );
 
-if ( pdst != NULL ) {
-	return fcmRegister( sit, CGI_P2PRegisterFcm);
-}
+    if ( pdst != NULL ) {
+        return fcmRegister( sit, CGI_P2PRegisterFcm);
+    }
 
-pdst = strstr( pcmd, "/fcm_delete.cgi" );
+    pdst = strstr( pcmd, "/fcm_delete.cgi" );
 
-if ( pdst != NULL ) {
-	return fcmDelete( sit, CGI_P2PDeleteFcm);
-}
+    if ( pdst != NULL ) {
+        return fcmDelete( sit, CGI_P2PDeleteFcm);
+    }
 
 #endif
 
@@ -10490,8 +10542,8 @@ void* p2plistenThreadProc( void* p )
     P2P_init();
     while ( 1 ) {
         if ( ( strlen( bparam.stIEBaseParam.dwDeviceID ) == 0 ) || ( bparam.stIEBaseParam.dwDeviceID[0] == 0x00 ) ) {
-			printf("dwDeviceID is null\n");
-			sleep( 3 );
+            printf("dwDeviceID is null\n");
+            sleep( 3 );
             continue;
         }
 #ifdef PPCS_API
@@ -10508,6 +10560,9 @@ void* p2plistenThreadProc( void* p )
 
         wifiok = 1;
         PushP2pSocket( handle );
+		#ifdef POWER_SAVE_MODE
+		StartVideoCaptureEx();
+		#endif
     }
 }
 
@@ -10694,21 +10749,21 @@ void p2ptalkrcv( int sit, unsigned int readsize )
         p2pstream[sit].talklen = 0x00;
     }
 }
-
 void* p2ptalkThreadProc( void* p )
 {
-    int         iRet = 0;
-    int         i = 0;
+    int             iRet = 0;
+    int             i = 0;
     unsigned int    readsize = 0;
-
+	char            onlineFlag = 0;
     while ( 1 ) {
         usleep( 10*1000 );
-
+		onlineFlag = 0;
         for ( i = 0; i < MAX_P2P_CONNECT; i++ ) {
             if ( p2pstream[i].socket == -1 ) {
                 continue;
             }
-
+			onlineFlag =1;//表示有p2p连接在线
+			
             // BEGIN: Added by wupm(2073111@qq.com), 2014/4/16
             readsize = 0;
 
@@ -10725,6 +10780,13 @@ void* p2ptalkThreadProc( void* p )
                 p2ptalkrcv( i, readsize );
             }
         }
+
+		#ifdef POWER_SAVE_MODE
+		if( (0 == CheckStartCalling())&& (0 == CheckLiveUser()) && 0 == onlineFlag)//在没有p2p链接和没有呼叫的情况下停止采集视频
+		{
+			StopVideoCaptureEx();
+		}
+		#endif
 
     }
 }
@@ -10901,6 +10963,7 @@ int p2pmediasendH264( int sit )
             PopP2pSocket( p2pstream[sit].socket );
             return  -5;
         }
+		//Textout("send video len:%d",len);
     }
 
     return 0;

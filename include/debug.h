@@ -77,7 +77,7 @@
 						//2=English
 						//对于英国客户来说，1:ppcs  2:pppp(旧库)
 
-#define PRODUCT_ID  1   //1=MJPEG
+#define PRODUCT_ID  2   //1=MJPEG
 //2=HD720(AIT-8433/SONIX 291A/B)
 //0=DONT SUPPORT IOS, APK VERSION V0730
 
@@ -176,14 +176,14 @@
 
 /***************version*****************/
 //#define UK_CUSTOMERS_OLD_KERNEL
-#define UK_CUSTOMERS_NEW_KERNEL
+//#define UK_CUSTOMERS_NEW_KERNEL
 //#define OLD_KERNEL_OBJ
 //#define PREFIX_OBJ
 //#define PREFIX_ZSKJ
 //#define OLD_KERNEL_XDBL
 //#define NEW_KERNEL_XDBL
-//#define PPCS_P2P_TEST
-//#define PREFIX_8433
+//#define PREFIX_FM34_PPCS
+#define PREFIX_8433
 /***************************************/
 
 
@@ -217,11 +217,15 @@
 #define MAJOR_VERSION   7
 //#undef INSMOD_UVC_DRIVER //test
 
-#define SUPPORT_FM34
-#define SUPPORT_IRCUT
+//#define SUPPORT_FM34
+//#define SUPPORT_IRCUT
 
 /* add begin by yiqing, 2016-07-18,fcm推送*/
 #define FCM_PUSH
+#define LDPUSH
+
+/* add begin by yiqing, 2016-07-26,省电模式，没有p2p链接的时候停止采集视频*/
+//#define POWER_SAVE_MODE
 
 #elif defined (OLD_KERNEL_XDBL)
 #define MAJOR_VERSION   8
@@ -230,27 +234,33 @@
 #elif defined (NEW_KERNEL_XDBL)
 #define MAJOR_VERSION   9
 
-#elif defined (PPCS_P2P_TEST)
-#define MAJOR_VERSION   10
+#elif defined (PREFIX_FM34_PPCS)
+#define MAJOR_VERSION   9
 #define SUPPORT_FM34
 #define SUPPORT_IRCUT
 #define PPCS_AES_P2P //善云p2p
+#define FCM_PUSH
+#define LDPUSH
+
 
 #elif defined (PREFIX_8433)
 #define MAJOR_VERSION   10
 #define PPCS_AES_P2P //善云p2p
+#define SUPPORT_IRCUT
+#define FCM_PUSH
+#define LDPUSH
+//#undef INSMOD_UVC_DRIVER
 
 #endif
 
-//#define JPUSH
-#define LDPUSH
+
 #define BAGGIO_API
 #ifndef SUPPORT_FM34
 #define ES8388S
 #endif
 
 #ifndef PPCS_API
-#ifndef PPCS_API_OLDs
+#ifndef PPCS_API_OLD
 #define XQ_P2P
 #endif
 #endif

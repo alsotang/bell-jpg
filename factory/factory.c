@@ -389,7 +389,11 @@ void ConfigVersion( void )
 	/* add begin by yiqing, 2016-07-19*/
 	//sync
 	//4.5.12.23
-	nVersion = 23;
+
+	/* add begin by yiqing, 2016-07-26*/
+	//添加bparam.stBell.userToken[i]变量
+	//4.5.11.24
+	nVersion = 24;
 
 #elif defined (PREFIX_OBJ)  //new kernel
     /* add begin by yiqing, 2015-06-11, 原因: */
@@ -481,7 +485,34 @@ void ConfigVersion( void )
 	/* add begin by yiqing, 2016-07-15*/
 	//4.7.11.30
 	//gcm fcm
-    nVersion = 30;
+
+	/* add begin by yiqing, 2016-07-25*/
+	//4.7.11.31
+	//undefine SUPPORT_FM34
+    //undefine SUPPORT_IRCUT
+
+	/* add begin by yiqing, 2016-07-26*/
+	//define POWER_SAVE_MODE
+	//4.7.11.32
+
+	/* add begin by yiqing, 2016-07-27*/
+	//undefine POWER_SAVE_MODE
+	//use daemon.bell.v23
+	//4.7.12.32
+	
+
+	/* add begin by yiqing, 2016-08-03*/
+	//define SUPPORT_FM34
+	//define SUPPORT_IRCUT
+	//4.7.12.33
+
+	/* add begin by yiqing, 2016-08-06*/
+	//undefine SUPPORT_FM34
+    //undefine SUPPORT_IRCUT
+    //初始化摄像头的时候sleep10秒，避免新dsp没图像问题
+	//4.7.12.34
+
+	nVersion = 34;
 
 #elif defined (OLD_KERNEL_XDBL)
     //4.8.12.10
@@ -491,29 +522,24 @@ void ConfigVersion( void )
     //4.9.12.10
     nVersion = 10;
 
-#elif defined (PPCS_P2P_TEST)
-    //4.10.11.10
-
-    /* add begin by yiqing, 2016-05-03,推送的时候一台接听后，其他客户端取消推送声音*/
-    //4.10.11.11
-
-    /* add begin by yiqing, 2016-05-10,test*/
-    //define SUPPORT_FM34
-    //define SUPPORT_IRCUT
-    //添加信鸽的安卓推送
-    //4.10.11.12
-
-    /* add begin by yiqing, 2016-05-13*/
-    //测试aes新字符串新id
-    //4.10.11.13
-    nVersion = 13;
+#elif defined (PREFIX_FM34_PPCS)
+    //4.9.12.10
+    nVersion = 10;
 
 #elif defined (PREFIX_8433)
 	/* add begin by yiqing, 2016-07-08*/
 	//使用亮点科技的尚云服务器
 	//8433
 	//4.10.21.10
-	nVersion = 10;
+
+	/* add begin by yiqing, 2016-08-05*/
+	//更新复位脚为邋moto_D7
+	//#define FCM_PUSH
+	//4.10.21.11
+
+	/* add begin by yiqing, 2016-08-25*/
+	//4.10.22.12
+	nVersion = 12;
 #endif
 
 #endif

@@ -166,26 +166,23 @@ void NetworkInitOK()
 extern void YiNetWorkThread( void );
 int main( void )
 {
+	Resourceinit();
 #ifndef UNABLE_AUDIO
     AudioCodecInit();
 	AudioCodecOpen();
-	
 #ifdef SUPPORT_FM34
     fm_Init();
 #else 
 	CheckAudioChip();
 #endif
-
     AudioStart();
 #endif
-
     BaSysTimerInit();
 
-    Resourceinit();
+    //Resourceinit();
     serverinit();
     InitMoto();
     MotoThreadStart();
-
 #if 0
         SetEncPower(0);
         sleep(1);
@@ -209,7 +206,6 @@ int main( void )
 
 
 	SendSystemVer();
-
 	if ( bparam.stBell.bell_audio == FALSE )
 	{
 		//Empty Parameters

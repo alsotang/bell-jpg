@@ -14,6 +14,7 @@
 int yisocketnet 	     = -1;
 unsigned short  clientport = 0;
 int				clientip   = 0;
+char             yiVideoFlag = 0;
 
 extern void OnDoorOpenEx();
 extern void SaveNewUUID(char *szNewUUID);
@@ -169,8 +170,7 @@ int NotifyToClient( eYiCmd cmd, eYiNetWorkSubCmd subcmd, char* pdata, int len)
     {
 		memcpy(param.buffer, pdata, len);
 	}
-		
-        
+		  
     addr.sin_family 		= AF_INET;
     addr.sin_port 			= clientport;
     addr.sin_addr.s_addr 	= clientip;
@@ -246,6 +246,11 @@ void* YINetThreadproc( void* p )
 
 			case eEnabneIr:
 				Textout("eEnabneIr");
+#ifdef POWER_SAVE_MODE
+				StartVideoCaptureEx();
+				yiVideoFlag = 1;
+
+#endif
 				EnableIR(0);
 				break;
 
@@ -257,6 +262,11 @@ void* YINetThreadproc( void* p )
                 break;
         }
     }
+}
+
+char GetYiVideoFlag(void)
+{
+	return yiVideoFlag;
 }
 
 void YiNetWorkInit( void )

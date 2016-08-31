@@ -46,6 +46,8 @@ unsigned int		refcntvideo = 0;
 unsigned int		refcntrecord = 0;
 unsigned int		refcntaudio = 0;
 
+static unsigned int             hprelen[MAX_CONN_USER_NUM];
+
 pthread_mutex_t    	acceptmutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t 		csocketmutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t 		socketmutex = PTHREAD_MUTEX_INITIALIZER;
@@ -295,7 +297,7 @@ int PushLiveSocketj( int socket, int streamid, int audio, int http )
         //if( streamuserj[i].socket == -1 )
         {
             //struct timeval timeout = {30,0};
-            printf( "push socket %d sit %d\n", socket, i );
+            Textout( "push socket %d sit %d", socket, i );
             //setsockopt(socket,SOL_SOCKET,SO_SNDTIMEO,(char *)&timeout,sizeof(struct timeval));
             setsockopt( socket, IPPROTO_TCP, TCP_NODELAY, ( char* )&nFlag, sizeof( int ) );
             //iBufSize = 1024 * 128;
@@ -385,7 +387,7 @@ int PushRecordSocket( int socket, int streamid, int audio, int http, char* filen
         if ( streamuserr[i].socket == -1 )
         {
             //struct timeval timeout = {30,0};
-            printf( "push socket %d sit %d\n", socket, i );
+            Textout( "push socket %d sit %d", socket, i );
             //setsockopt(socket,SOL_SOCKET,SO_SNDTIMEO,(char *)&timeout,sizeof(struct timeval));
             setsockopt( socket, IPPROTO_TCP, TCP_NODELAY, ( char* )&nFlag, sizeof( int ) );
             iBufSize = 16384;
@@ -412,7 +414,6 @@ int PushRecordSocket( int socket, int streamid, int audio, int http, char* filen
 }
 
 //jpeg stream socket
-
 void PushVideoSocketj( int socket, int streamid, int audio, int http )
 {
     int    i;
@@ -465,7 +466,7 @@ void PushVideoSocketj( int socket, int streamid, int audio, int http )
         if ( videouserj[i].socket == -1 )
         {
             //struct timeval timeout = {30,0};
-            printf( "video push socket %d sit %d\n", socket, i );
+            Textout( "video push socket %d sit %d", socket, i );
             //setsockopt(socket,SOL_SOCKET,SO_SNDTIMEO,(char *)&timeout,sizeof(struct timeval));
             setsockopt( socket, IPPROTO_TCP, TCP_NODELAY, ( char* )&nFlag, sizeof( int ) );
             // iBufSize = 1024 * 4;
@@ -786,85 +787,6 @@ int Checklivestreamcgi( char* pbuf, int socket, char authflag )
     CloseSocket( socket );
     return -1;
 #endif
-
-#if	0
-/////////////////////////
-
-#if 1
-    memset( usertemp, 0x00, 32 );
-    memset( pwdtemp, 0x00, 32 );
-    memset( temp2, 0x00, 128 );
-    memset( decoderbuf, 0x00, 128 );
-    iRet = GetStrParamValue( pbuf, "user", temp2, 31 );
-    if ( iRet == 0x00 )
-    {
-        memset( decoderbuf, 0x00, 128 );
-        URLDecode( temp2, strlen( temp2 ), decoderbuf, 31 );
-        memset( usertemp, 0x00, 32 );
-        strcpy( usertemp, decoderbuf );
-    }
-
-    memset( temp2, 0x00, 128 );
-    memset( decoderbuf, 0x00, 128 );
-    iRet += GetStrParamValue( pbuf, "pwd", temp2, 31 );
-    if ( iRet == 0x00 )
-    {
-        memset( decoderbuf, 0x00, 128 );
-        URLDecode( temp2, strlen( temp2 ), decoderbuf, 31 );
-        memset( pwdtemp, 0x00, 32 );
-        strcpy( pwdtemp, decoderbuf );
-    }
-
-    Textout("user=%s, pwd=%s, iRet=%d", usertemp, pwdtemp, iRet);
-
-    if ( iRet )
-    {
-        memset( temp2, 0x00, 128 );
-        memset( decoderbuf, 0x00, 128 );
-        iRet = GetStrParamValue( pbuf, "loginuse", temp2, 31 );
-
-        if ( iRet == 0x00 )
-        {
-            memset( decoderbuf, 0x00, 128 );
-            URLDecode( temp2, strlen( temp2 ), decoderbuf, 31 );
-            memset( usertemp, 0x00, 32 );
-            strcpy( usertemp, decoderbuf );
-        }
-
-        memset( temp2, 0x00, 128 );
-        memset( decoderbuf, 0x00, 128 );
-        iRet += GetStrParamValue( pbuf, "loginpas", temp2, 31 );
-
-        if ( iRet == 0x00 )
-        {
-            memset( decoderbuf, 0x00, 128 );
-            URLDecode( temp2, strlen( temp2 ), decoderbuf, 31 );
-            memset( pwdtemp, 0x00, 32 );
-            strcpy( pwdtemp, decoderbuf );
-        }
-    }
-
-#else
-    memset( usertemp, 0x00, 32 );
-    memset( pwdtemp, 0x00, 32 );
-    iRet = GetStrParamValue( pbuf, "user", usertemp, 31 );
-    memset( temp2, 0x00, 128 );
-    memset( decoderbuf, 0x00, 128 );
-    iRet += GetStrParamValue( pbuf, "pwd", pwdtemp, 31 );
-
-    if ( iRet )
-    {
-        memset( temp2, 0x00, 128 );
-        memset( decoderbuf, 0x00, 128 );
-        iRet = GetStrParamValue( pbuf, "loginuse", usertemp, 31 );
-        iRet += GetStrParamValue( pbuf, "loginpas", pwdtemp, 31 );
-    }
-
-#endif
-
-//////////////////////
-#endif
-
 
     iRet += GetIntParamValue( pbuf, "streamid", &streamid );
     Textout( "live find user pwd=%d encrypt=%d, StreamID = %d", iRet, encryptflag, streamid );
@@ -1682,6 +1604,149 @@ int LIVE_ALARM_Send( char type )
         alarm3unlock();
     }
 }
+
+
+/* add begin by yiqing, 2016-08-17*/
+int SendH264Data( int socket, unsigned char* pbuf, unsigned int iBufLen )
+{
+    int             iRet = 0;
+    int             len = 0x00;
+    int             sendlen = 0;
+    char*            pdst = NULL;
+
+    if ( socket == -1 ) {
+        printf( "send jpeg end1\n" );
+        return -1;
+    }
+
+    while ( len < iBufLen ) {
+        iRet = send( socket, pbuf + len, iBufLen - len, 0 );
+
+        if ( iRet == -1 ) {
+            Textout( "send failed errno:%s", strerror( errno ) );
+            Textout( "Total Data Len = %d, Send Bytes = %d", iBufLen, len );
+            len = -1;
+            break;
+        }
+        else {
+            len += iRet;
+            //printf("socket %d send %d total %d\n",socket,iRet,iBufLen);
+        }
+    }
+
+    //netunlock();
+    if ( len == -1 ) {
+        return -1;
+    }
+
+    return 0;
+}
+
+void SendH264Stream( char usit )
+{
+	//Textout("SendH264Stream sit=%d",usit);
+    int                         iRet;
+    int             status;
+    unsigned int           len     = 0;
+    unsigned char*        pbuf   = NULL;
+    LIVEHEAD               phead;
+    unsigned char        sendbuf[MAX_VIDEO_BUFFER_SIZE];
+    static unsigned int  frameno = 0;
+
+    mainLock();
+
+    if ( userindm[usit].flag > 0 ) {
+        if ( userindm[usit].flag  == 0x01 ) {
+            userindm[usit].offset = 0x00;
+        }
+
+        else if ( userindm[usit].flag  == 0x02 ) {
+            userindm[usit].offset = EBUF_MAX_MLEN / 2;
+        }
+
+        userindm[usit].flag = 0x00;
+        frameno = 0;
+        //printf("change buffer %d frameno %d\n",encbufm.prelen,frameno);
+    }
+
+    if ( hprelen[usit] == encbufm.prelen || encbufm.flag == 0) {
+        //printf("hprelen=%d encubfm.prelen=%d, encbufm.flag=%d\n",hprelen[usit],encbufm.prelen, encbufm.flag);
+        mainUnlock();
+        return;
+    }
+
+    hprelen[usit] = encbufm.prelen;
+    frameno++;
+    //read live head
+    memcpy( &phead, encbufm.pbuf + userindm[usit].offset, sizeof( LIVEHEAD ) );
+    //read buffer or need copy buffer?
+    pbuf = encbufm.pbuf + userindm[usit].offset;
+    len = phead.len + sizeof( LIVEHEAD );
+
+    //printf("offset %d prelen %d len %d\n",userindm[usit].offset,encbufm.prelen,len);
+    //printf("frameno=%d type=%d, len=%d\n",phead.frameno,phead.type, phead.len);
+    if ( len >= MAX_VIDEO_BUFFER_SIZE ) {
+        status = -1;
+    }
+
+    else {
+        memcpy( sendbuf, pbuf, len );
+        status = 0;
+    }
+
+    if(phead.startcode != STARTCODE) {
+        Textout("phead.startcode != STARTCODE");
+        status = -1;
+    }
+
+    mainUnlock();
+
+    if ( status == 0x00 ) {
+        /*if( (phead.frameno % 50 ) == 0)
+        {
+            Textout("size=%d, type=%d, frameno=%d, len=%d",
+                phead.size,
+                phead.type,
+                phead.frameno,
+                phead.len);
+        }*/
+
+        iRet = SendH264Data( streamuserj[usit].socket, sendbuf, len );
+
+
+    }
+
+    else {
+        iRet = -1;
+        //printf("len >= 1024 * 128\n");
+        printf( "h264 len:%d frameno %d status %d\n", len, phead.frameno, status );
+    }
+
+    if ( iRet ) {
+        char j;
+        char flag = 0;
+        printf( "send failed %d\n", usit );
+        socketlock();
+        CloseSocket( streamuserj[usit].socket );
+        streamuserj[usit].socket = -1;
+        streamuserj[usit].refcnt  = -1;
+
+        InitUserIndicator( MAINRATE, usit );
+
+        socketunlock();
+
+        for ( j = 0; j < MAX_CONN_USER_NUM; j++ ) {
+            if ( streamuserj[j].socket != -1 ) {
+                flag = 0x01;
+            }
+        }
+
+    }
+
+    userindm[usit].offset += len;
+}
+
+/* add end by yiqing, 2016-08-17 */
 //==========================jpeg rate send======================
 int SendJpegData0( int socket, unsigned char* pbuf, unsigned int iBufLen )
 {
@@ -1725,6 +1790,7 @@ int SendJpegData0( int socket, unsigned char* pbuf, unsigned int iBufLen )
 
     return 0;
 }
+
 //send jpeg stream
 void SendJpegStream0( char usersit )
 {
@@ -1800,7 +1866,6 @@ int SendJpegData1( int socket, unsigned char* pbuf, unsigned int iBufLen )
 
     while ( len < iBufLen )
     {
-#if 1
         iRet = send( socket, pbuf + len, iBufLen - len, 0 );
 
         if ( iRet == -1 )
@@ -1815,36 +1880,6 @@ int SendJpegData1( int socket, unsigned char* pbuf, unsigned int iBufLen )
             len += iRet;
             Textout4("2 socket %d send %d total %d\n",socket,len,iBufLen);
         }
-
-#else
-
-        if ( ( iBufLen - len ) >= 1024 )
-        {
-            sendlen = 1024;
-        }
-
-        else
-        {
-            sendlen = iBufLen - len;
-        }
-
-        pdst = pbuf + len;
-        iRet = send( socket, pdst, sendlen, 0 );
-
-        if ( iRet == -1 )
-        {
-            printf( "send failed len=%d error %d errno:%s\n", iRet, errno, strerror( errno ) );
-            len = -1;
-            break;
-        }
-
-        else
-        {
-            len += iRet;
-            //printf("socket %d send %d total %d\n",socket,iRet,iBufLen);
-        }
-
-#endif
     }
 
     alarm1unlock();
@@ -1939,7 +1974,6 @@ int SendJpegData2( int socket, unsigned char* pbuf, unsigned int iBufLen )
 
     while ( len < iBufLen )
     {
-#if 1
         iRet = send( socket, pbuf + len, iBufLen - len, 0 );
 
         if ( iRet == -1 )
@@ -1954,36 +1988,6 @@ int SendJpegData2( int socket, unsigned char* pbuf, unsigned int iBufLen )
             len += iRet;
             Textout4("3 socket %d send %d total %d\n",socket,len,iBufLen);
         }
-
-#else
-
-        if ( ( iBufLen - len ) >= 1024 )
-        {
-            sendlen = 1024;
-        }
-
-        else
-        {
-            sendlen = iBufLen - len;
-        }
-
-        pdst = pbuf + len;
-        iRet = send( socket, pdst, sendlen, 0 );
-
-        if ( iRet == -1 )
-        {
-            printf( "send failed len=%d error %d errno:%s\n", iRet, errno, strerror( errno ) );
-            len = -1;
-            break;
-        }
-
-        else
-        {
-            len += iRet;
-            //printf("socket %d send %d total %d\n",socket,iRet,iBufLen);
-        }
-
-#endif
     }
 
     alarm2unlock();
@@ -2077,7 +2081,6 @@ int SendJpegData3( int socket, unsigned char* pbuf, unsigned int iBufLen )
 
     while ( len < iBufLen )
     {
-#if 1
         iRet = send( socket, pbuf + len, iBufLen - len, 0 );
 
         if ( iRet == -1 )
@@ -2092,36 +2095,6 @@ int SendJpegData3( int socket, unsigned char* pbuf, unsigned int iBufLen )
             len += iRet;
             //Textout5("4 socket %d send %d total %d\n",socket,len,iBufLen);
         }
-
-#else
-
-        if ( ( iBufLen - len ) >= 1024 )
-        {
-            sendlen = 1024;
-        }
-
-        else
-        {
-            sendlen = iBufLen - len;
-        }
-
-        pdst = pbuf + len;
-        iRet = send( socket, pdst, sendlen, 0 );
-
-        if ( iRet == -1 )
-        {
-            printf( "send failed len=%d error %d errno:%s\n", iRet, errno, strerror( errno ) );
-            len = -1;
-            break;
-        }
-
-        else
-        {
-            len += iRet;
-            //printf("socket %d send %d total %d\n",socket,iRet,iBufLen);
-        }
-
-#endif
     }
 
     alarm3unlock();
@@ -2527,7 +2500,11 @@ void* SendLiveProcj0( void* p )
         wifiok = 1;
         streamid = streamuserj[usersit].streamid;
         //send video
+        #ifdef SENSOR_3861
         SendJpegStream0( usersit );
+		#else
+		SendH264Stream(usersit);
+		#endif
         //printf("jpeg0 send end\n");
 #if 0
 
@@ -2576,7 +2553,11 @@ void* SendLiveProcj1( void* p )
         streamid = streamuserj[usersit].streamid;
         Textout0("jpeg1 rate streamid %d\n",streamid);
         //send video
+        #ifdef SENSOR_3861
         SendJpegStream1( usersit );
+		#else
+		SendH264Stream(usersit);
+		#endif
         //printf("jpeg1 send end\n");
 #if 0
 
@@ -2625,7 +2606,11 @@ void* SendLiveProcj2( void* p )
         streamid = streamuserj[usersit].streamid;
         Textout0("jpeg2 rate streamid %d\n",streamid);
         //send video
+        #ifdef SENSOR_3861
         SendJpegStream2( usersit );
+		#else
+		SendH264Stream(usersit);
+		#endif
         //printf("jpeg2 send end\n");
 #if 0
 
@@ -2676,7 +2661,11 @@ void* SendLiveProcj3( void* p )
         //send video
 
 		/* BEGIN: Modified by wupm, 2013/4/10 */
-        //SendJpegStream3(usersit);
+        #ifdef SENSOR_3861
+        SendJpegStream3( usersit );
+		#else
+		SendH264Stream(usersit);
+		#endif
         //printf("jpeg3 send end\n");
 #if 0
 
@@ -2713,7 +2702,6 @@ int SendVideoData( int socket, unsigned char* pbuf, unsigned int iBufLen )
     //alarm3lock();
     while ( len < iBufLen )
     {
-#if 1
         iRet = send( socket, pbuf + len, iBufLen - len, 0 );
 
         if ( iRet == -1 )
@@ -2729,35 +2717,6 @@ int SendVideoData( int socket, unsigned char* pbuf, unsigned int iBufLen )
             //printf("socket %d send %d total %d\n",socket,iRet,iBufLen);
         }
 
-#else
-
-        if ( ( iBufLen - len ) >= 1024 )
-        {
-            sendlen = 1024;
-        }
-
-        else
-        {
-            sendlen = iBufLen - len;
-        }
-
-        pdst = pbuf + len;
-        iRet = send( socket, pdst, sendlen, 0 );
-
-        if ( iRet == -1 )
-        {
-            printf( "send failed len=%d error %d errno:%s\n", iRet, errno, strerror( errno ) );
-            len = -1;
-            break;
-        }
-
-        else
-        {
-            len += iRet;
-            //printf("socket %d send %d total %d\n",socket,iRet,iBufLen);
-        }
-
-#endif
     }
 
     //alarm3unlock();
@@ -3712,8 +3671,6 @@ void NetCmdThread( void )
     StreamUserThread();
 }
 
-/* BEGIN: Added by wupm, 2013/5/6 */
-#ifdef	AUTO_REBOOT
 BOOL CheckLiveUser()
 {
 	int i;
@@ -3727,6 +3684,7 @@ BOOL CheckLiveUser()
 			(audiouserj[i].socket != -1 && audiouserj[i].socket != 0) 		//audio stream user
 			)
 		{
+			/*
 			Textout("index = %d, streamuserj = %d, userr=%d, videouser = %d, audio =%d",
 				i,
 				streamuserj[i].socket,
@@ -3734,11 +3692,11 @@ BOOL CheckLiveUser()
 				videouserj[i].socket,
 				audiouserj[i].socket
 				);
+				*/
 			return TRUE;
 		}
     }
 	return FALSE;
 }
-#endif
 
 

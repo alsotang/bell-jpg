@@ -1260,8 +1260,11 @@ int GetIntParamValue( const char* pszSrc, const char* pszParamName, int* iValue 
 	*iValue = 0;
 	if ( iRet == 0 )
 	{
-		if ( szParamValue[0] != 0 )
+		//Textout("szParamValue:%s",szParamValue);
+		if ( szParamValue[0] != 0 ){
 			*iValue = atoi(szParamValue);
+			//Textout("iValue=%d",*iValue);
+			}
 	}
 	else
 	{
@@ -5307,18 +5310,19 @@ int cgisetcamcontrol( char* pbuf, char* pparam, unsigned char byPri )
     char            temp2[32];
     int             len  = 0;
     int             iRet = 0;
-    int		iRet1 = 0;
+    int		        iRet1 = 0;
     char            passtemp[32];
     char            usertemp[32];
     char            nexturl[64];
     int             iValue;
     unsigned char	cmd = 0;
-    unsigned char	param = 0;
+    unsigned int	param = 0;
     char				decoderbuf[128];
     memset( temp, 0x00, 2048 );
     iRet = GetIntParamValue( pparam, "param", &iValue );
     cmd = iValue;
-    iRet += GetIntParamValue( pparam, "value", &iValue );
+    iRet1 = GetIntParamValue( pparam, "value", &iValue );
+	Textout("value=%d",iValue);
     param = iValue;
     //printf("camcontrol iRet %d  iRet1 %d value %d param:%s len %d\n",iRet,iRet1,param,pparam,strlen(pparam));
     printf( "cameracontrol...param:%d,value:%d\n", cmd, param );

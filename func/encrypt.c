@@ -72,7 +72,6 @@ void WS222_SDA( char value )
 #endif
 
 
-
     if ( value )
     {
         gpiovalue |= 0x02;
@@ -149,7 +148,7 @@ void gpioinit( void )
 			/* add begin by yiqing, 2015-10-20设置第17脚MOTO_UP为输入脚PIR检测用*/
 			iRet = ioctl( i2cfd , RALINK_GPIO_SET_DIR, 0x0fc07806 );
 		#else
-			/* modify begin by yiqing, 2015-07-17, 原因: 设置25脚为输出脚，控制音频芯片复位*/
+			/* modify begin by yiqing, 2015-07-17, 原因: 设置25bit为输出脚，控制音频芯片复位*/
 			//iRet = ioctl( i2cfd , RALINK_GPIO_SET_DIR, 0x0dc27804 );
 			iRet = ioctl( i2cfd , RALINK_GPIO_SET_DIR, 0x0fc27806 );
 		#endif
@@ -1581,9 +1580,7 @@ Fm34Driver_t fm34Driver[MAX_FM34_DRIVER] =
 #ifdef VOLUME_INCREASE                                                
     {0x23,0x0D,0x26,0x00},
 #else
-	/* add begin by yiqing, 2015-10-15*/
-    //{0x23,0x0D,0x12,0x00},
-    {0x23,0x0D,0x32,0x00},
+    {0x23,0x0D,0x07,0x90},
 #endif
                                         /*Speaker volume
                                                     0x0000~0x7FFF
@@ -1712,14 +1709,14 @@ void i2c_open()
 	gpioopen();
     gpioinit();
 
-
     #ifdef SUPPORT_FM34
     gpiovalue &= ~(1<<25);
     ioctl( i2cfd , RALINK_GPIO_WRITE, gpiovalue );
     usleep(1000);
+	
+	gpiovalue |= (1<<25);
+	ioctl( i2cfd , RALINK_GPIO_WRITE, gpiovalue );
     
-    gpiovalue |= (1<<25);
-    ioctl( i2cfd , RALINK_GPIO_WRITE, gpiovalue );
     usleep(15000);
     #endif
   

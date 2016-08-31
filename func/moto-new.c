@@ -1357,6 +1357,8 @@ void OnReset()
 #ifdef FCM_PUSH
 	DoSystem( "rm /param/fcmparamlist.bin" );
 #endif
+	DoSystem( "rm /param/changemaxauto.bin" );
+	
     SetRebootCgi();
 }
 
@@ -1890,7 +1892,7 @@ void GpioStatusLed( char value )
 
     GpioLock();
 	#ifdef PREFIX_8433
-	mask |= _MOTO_D2;
+	mask = ~_MOTO_D7;
 	#else
     mask = ~_MOTO_D1;
 	#endif
@@ -1899,7 +1901,7 @@ void GpioStatusLed( char value )
     if ( value )
     {
     	#ifdef PREFIX_8433
-        portvalue |= _MOTO_D2;
+        portvalue |= _MOTO_D7;
 		#else
 		portvalue |= _MOTO_D1;
 		#endif
@@ -1913,10 +1915,19 @@ void GpioStatusLed( char value )
 
 void ResetSensor()
 {
+	Textout("ResetSensor");
+#if 0
     GpioStatusLed( 0 );
     sleep( 1 );
     GpioStatusLed( 1 );
     sleep( 2 );
+#else
+	GpioStatusLed( 1 );
+    sleep( 1 );
+    GpioStatusLed( 0 );
+    sleep( 2 );
+
+#endif
 }
 #endif
 

@@ -760,7 +760,7 @@ typedef struct
 #define	BELL_ALARMIN		_ALARM_IN		//Alarm in(Open Door)
 #define	BELL_RESET			_DEFKEY			//Reset
 /* add begin by yiqing, 2015-09-06, 原因: 检测光敏电阻变化控制IRC*/
-#define	BELL_PIR			_MOTO_UP		//PIR
+#define	BELL_PIR			_MOTO_UP		//IRc
 
 #ifdef NEW_BRAOD_AES
 /* add begin by yiqing, 2016-03-29,英国客户ap按键*/
@@ -774,7 +774,7 @@ typedef struct
 //OUTPUT(RISEN)
 #define	BELL_OPENDOOR		_ALARMOUT		//Open Door(K)
 #define	BELL_LED			_MOTO_D2		//Status LED
-#define	BELL_IR_CONTROL		_MOTO_D0		//1=Enable, 0=Disable  镜头板红外灯电源控制,加pir功能后去掉
+#define	BELL_IR_CONTROL		_MOTO_D0		//1=Enable, 0=Disable  镜头板红外灯电源控制,加irc功能后去掉
 #define	BELL_IR_CONTROL0		_MOTO_D0		//1=Enable, 0=Disable
 #define	BELL_IR_CONTROL1		_MOTO_D1		//1=Enable, 0=Disable
 #define BELL_AUDIO          _MOTO_D4        //0=On, 1=Off  
@@ -1071,7 +1071,8 @@ typedef struct
 	char	current_framerate;
 	short	current_bitrate;
 
-	char	xx[64];
+	int     userToken[MAX_USER];
+	char	xx[32];
 }BELLPARAMS;
 #endif
 
@@ -1462,8 +1463,11 @@ typedef enum _WIFIMODE
 #define LIVE_RECORD_END			207
 #define LIVE_MAX_CONNECT			201
 
-#define SJPEGRATE	3
+#define MAINRATE       	0
+#define SUBRATE      	1
+#define MJPEGRATE       2
 
+#define SJPEGRATE	3
 #define RECORDRATE	4
 
 
@@ -1650,6 +1654,6 @@ void ReadFcmParams(void);
 void WriteFcmParams(void);
 int FcmPush(char *send_data);
 #endif
-
+BOOL CheckLiveUser();
 #endif //__CONFIG_H__
 
