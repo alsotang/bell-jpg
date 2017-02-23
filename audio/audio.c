@@ -315,7 +315,12 @@ void* AudioCapture( void* p )
             usleep( 1000*1000 );
             continue;
         }
-        
+        /* add begin by yiqing, 2017-02-15*/
+		if(1 == getPlayAudioFlag())
+		{
+			usleep( 100*1000 );
+			continue;
+		}
         if(audiofd == -1) break;        
         memset(temp, 0, 4*1024);
         iRet = ioctl( audiofd, 5, temp );	//I2S_GET_AUDIO
@@ -376,8 +381,12 @@ void BaAudioTalkProc(void* p)
 			fwrite(szAudioTalk,1,WAV_FILE_FRAME_SIZE*2,audiofp);
 		}
 		*/
-		
 
+		/* add begin by yiqing, 2017-02-15*/
+		if(1 == getPlayAudioFlag())
+		{
+			continue;
+		}
 		ioctl( audiofd, 4, szAudioTalk );
 
     }

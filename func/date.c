@@ -93,6 +93,7 @@ int GetNtpTime( void )
 
 void SetNtpRestart( char flag )
 {
+	Textout("SetNtpRestart flag = %d",flag);
     ntpflag = flag;
     ntptimes = 0x00;
 }

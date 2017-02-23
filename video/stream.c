@@ -64,12 +64,31 @@ int MotionDetect( int* motionarea )
 
     int		iRet = 0;
 
-    H264GetMotionResult( (unsigned char*)&result );
-
+#ifdef SENSOR_3894
+	iRet = H264_GetMotionResult( (unsigned char*)&result );
+	//Textout("H264_GetMotionResult status=%d",iRet);
+	return iRet;
+#else
+    iRet = H264GetMotionResult( (unsigned char*)&result );
+#endif
     if ( result > 0 )
     {
+    	//Textout("H264GetMotionResult is %d",iRet);
         *motionarea = result;
-        iRet = 0x01;
+#ifdef PREFIX_8433_PPCS
+		//if(iRet >1)//至少两个区域以上发生移动侦测才算触发报警
+		if(iRet >0)
+		{
+			iRet = 0x01;
+		}
+		else
+		{
+			iRet = 0;
+		}
+#else
+		iRet = 0x01;
+#endif
+        
     }
 
     return iRet;

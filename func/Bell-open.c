@@ -24,6 +24,12 @@ void StartOpenLock()
 	bOpenTimes = 0;
 	SetBellLock(TRUE);
 	Textout("Open Lock ---------- Start ");
+#ifdef  RUIYITONG
+	ControlIO(BELL_OPENDOOR_2, 1);
+#endif
+
+	/* add begin by yiqing, 2017-02-15*/
+	setPlayAudioFlag(1);//播放开锁音频内，咪头不采集声音，以免产生哒哒哒的声音
 
 	#ifndef UK_CUSTOMERS_NEW_KERNEL
 	StartAudioPlay(WF_OPENLOCK, 1, NULL);
@@ -47,59 +53,23 @@ void* ThreadOpenDelayProc( void* p )
 	static int bTimeing = FALSE;
 	while(1)
 	{
-		sleep(1);
-		//if ( !bDoorOpening && !bTimeing )
-		//Textout("bDoorOpening = %d", bDoorOpening);
+		
 		if ( !bDoorOpening )
 		{
-			//time = 0;
-			sleep(1);
+			usleep(100);
 			continue;
 		}
-
-		/*
-		if ( bDoorOpening )
-		{
-			time = 0;
-			bDoorOpening = FALSE;
-		}
-		*/
-
-		/*
-		if ( !bTimeing )
-		{
-			bTimeing = TRUE;
-			SetLockOpen(TRUE);
-			Textout("Open Lock ---------- Start ");
-		}
-
-		if ( bTimeing )
-		{
-			time ++;
-			Textout("Open Locker Timer = %d", time);
-			if ( time >= bell_data.nLockDelayTime )
-			{
-				bTimeing = FALSE;
-				SetLockOpen(FALSE);
-				Textout("Open Lock ---------- Over ");
-			}
-		}
-		*/
+		sleep(1);
 
 		bOpenTimes ++;
 
-		/* BEGIN: Modified by wupm(2073111@qq.com), 2014/6/13 */
-		//Textout("Open Locker Timer = %d, MAX = %d", bOpenTimes, bell_data.nLockDelayTime);
-		//if ( bOpenTimes >= bell_data.nLockDelayTime )
-		//Textout("Open Lock, Time = %d, delay = %d", bOpenTimes, bparam.stBell.lock_delay);
-
-		/* BEGIN: ACTOP: Disable any Lock Funtion, Default Lock-Delay-Timer is 1 seconds */
-		/*        Modified by wupm(2073111@qq.com), 2014/10/22 */
-		#ifndef	FACTOP
-			if ( bOpenTimes >= bparam.stBell.lock_delay )
-		#else
-			if ( bOpenTimes >= 2 )	//1 seconds
-		#endif
+#ifdef  RUIYITONG
+		if ( bOpenTimes >= 1 )
+		{
+			ControlIO(BELL_OPENDOOR_2, 0);
+		}
+#endif
+		if ( bOpenTimes >= bparam.stBell.lock_delay )
 		{
 			bDoorOpening = FALSE;
 			bOpenTimes = 0;
@@ -189,7 +159,7 @@ void OnDoorOpen()
     OnDoorOpenEx();
 #endif
 
-#ifdef ZHENGSHOW
+#ifdef DINGDONG
     SetMcuNotyceFlag(1);
 #endif
 
@@ -211,7 +181,7 @@ void OnDoorUnlock(char door,char value)
 {
 	Textout("OnDoorUnlock  door:%d  value:%d",door,value);
 #ifdef ZHENGSHOW
-    if ( bparam.stBell.lock_type == 0)//no
+    if ( bparam.stBell.lock_type == 1)//nc
     {
         if(1 == value )
         {
@@ -236,7 +206,7 @@ void OnDoorUnlock(char door,char value)
 			}
         }
     }
-    else                               //nc
+    else                               //no
     {
 		if(1 == door)
     	{

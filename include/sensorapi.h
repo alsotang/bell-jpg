@@ -2,6 +2,8 @@
 #ifndef _291A_API_H_
 #define _291A_API_H_
 
+#include "ak3894_api.h"
+
 #define SENSOR_DEFAULT_ENABLE       1
 #define SENSOR_DEFAULT_DISABLE      0
 
@@ -310,7 +312,20 @@ int H264GetMotionResult( unsigned char* md_mask ); /* D[191:0]: Motion Detect Re
 
 //**************************** Only for 291B ************************************
 
+//**************************** Only for 3894 ************************************
+int H264_StartVideoCapture(unsigned char resolution, unsigned char framerate);
+int H264_StopVideoCapture();
+int H264_ChangeResolution( unsigned char resolution, unsigned char framerate );
+int H264_SetMirr( unsigned char mode );
+int H264_GetMotionResult( unsigned char* md_mask );
+int H264_SetIFramePeriod( unsigned int gop );
+int H264_SetMotionEnable( unsigned char level );
+void H264_VideoInit( unsigned char resolution, unsigned char framerate );
+void MJPG_VideoInit( int resolution, int framerate );
+int H264_SetUvcCtrlParam(eUvcParam eIndex, puvcCtrlParam_t pparam);
+int H264_SetBitrate( unsigned int bitrate );
 
+//**************************** Only for 3894 ************************************
 
 #endif
 

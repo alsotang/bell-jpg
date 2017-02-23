@@ -30,6 +30,11 @@
 #define SENSOR_3861
 #endif
 
+#ifdef SENSOR_3894
+#undef SENSOR_3894
+#define SENSOR_3894
+#endif
+
 #ifdef SENSOR_8433
 #undef SENSOR_8433
 #define SENSOR_8433
@@ -78,7 +83,7 @@
 						//对于英国客户来说，1:ppcs  2:pppp(旧库)
 
 #define PRODUCT_ID  2   //1=MJPEG
-//2=HD720(AIT-8433/SONIX 291A/B)
+//2=HD720(AIT-8433/SONIX 291A/B/3894)
 //0=DONT SUPPORT IOS, APK VERSION V0730
 
 #define VER_SOFTWARE    ( PRODUCT_ID * 10 + LANGUAGE_ID )
@@ -182,8 +187,11 @@
 //#define PREFIX_ZSKJ
 //#define OLD_KERNEL_XDBL
 //#define NEW_KERNEL_XDBL
+//#define PREFIX_8388S_PPCS
 //#define PREFIX_FM34_PPCS
-#define PREFIX_8433
+//#define PREFIX_8433_PPCS
+//#define AES_FM34_PPCS
+#define FM34_3894_PPCS
 /***************************************/
 
 
@@ -205,10 +213,12 @@
 #ifdef NEW_BRAOD_AES
 #define SUPPORT_FM34
 #define SUPPORT_IRCUT
+#define LOCK_TOGGLED //锁的控制信号反转，一上电就控制继电器跳变
 #endif
 /* add begin by yiqing, 2016-05-13*/
 #define PPCS_AES_P2P //善云p2p
 #define FCM_PUSH
+#define LDPUSH
 
 #elif defined (PREFIX_OBJ)
 #define MAJOR_VERSION   6
@@ -217,8 +227,9 @@
 #define MAJOR_VERSION   7
 //#undef INSMOD_UVC_DRIVER //test
 
+//#define DINGDONG //室内分机叮咚
 //#define SUPPORT_FM34
-//#define SUPPORT_IRCUT
+#define SUPPORT_IRCUT
 
 /* add begin by yiqing, 2016-07-18,fcm推送*/
 #define FCM_PUSH
@@ -234,6 +245,13 @@
 #elif defined (NEW_KERNEL_XDBL)
 #define MAJOR_VERSION   9
 
+#elif defined (PREFIX_8388S_PPCS)
+#define MAJOR_VERSION   8
+#define PPCS_AES_P2P //善云p2p
+#define FCM_PUSH
+#define LDPUSH
+#define LIYUANCHUANG ///黄灿项目
+
 #elif defined (PREFIX_FM34_PPCS)
 #define MAJOR_VERSION   9
 #define SUPPORT_FM34
@@ -241,14 +259,46 @@
 #define PPCS_AES_P2P //善云p2p
 #define FCM_PUSH
 #define LDPUSH
+//#define RUIYITONG  //睿易通
+#define TAICHUAN  //太川  由于硬件问题，此版本IRC控制跟普通版本相反
+#define DINGDONG //叮咚
 
 
-#elif defined (PREFIX_8433)
+#elif defined (PREFIX_8433_PPCS)
 #define MAJOR_VERSION   10
 #define PPCS_AES_P2P //善云p2p
 #define SUPPORT_IRCUT
+#define XINSILU_BOARD //新思路
+#ifndef XINSILU_BOARD
+#define SUPPORT_FM34
+#endif
 #define FCM_PUSH
 #define LDPUSH
+//#undef INSMOD_UVC_DRIVER
+#define COLOR_TO_BLACK	//彩转黑功能
+
+#elif defined (AES_FM34_PPCS)
+#define MAJOR_VERSION   11
+#define SUPPORT_FM34
+#define SUPPORT_IRCUT
+#define PPCS_AES_P2P //善云p2p
+#define FCM_PUSH
+#define LDPUSH
+#define NEW_BRAOD_AES  //test
+//#define LOCK_TOGGLED //锁的控制信号反转，一上电就控制继电器跳变
+
+//#undef INSMOD_UVC_DRIVER  //test
+
+#elif defined (FM34_3894_PPCS)
+#define MAJOR_VERSION   12
+#define SUPPORT_FM34
+#define SUPPORT_IRCUT
+#define PPCS_AES_P2P //善云p2p
+#define FCM_PUSH
+#define LDPUSH
+#define COLOR_TO_BLACK //彩转黑
+#define RUIYITONG  //睿易通
+
 //#undef INSMOD_UVC_DRIVER
 
 #endif

@@ -8,11 +8,17 @@
 
 #include "sensorapi.h"
 
+#include "ak3894_api.h"
+
 unsigned char videocmd = 0;
 unsigned short videoparam = 0;
 unsigned char videoctrl = 0;
 
 char videoCaptureFlag = 1;//标记当前是否采集视频，由于上电初始化就采集，所以标记为1
+
+//#ifdef SENSOR_3894
+uvcCtrlParam_t uvcCtrlParam;
+//#endif
 
 sem_t   savesem;
 sem_t   camsem;
@@ -30,6 +36,7 @@ void NoteSaveSem()
 
 void VideoParamInit_8433( void )
 {
+#ifdef SENSOR_8433
 #ifdef USE_SENSOR_DEFAULT
 
     if ( GetUseSensorDefaultFlag() == 1 ) {
@@ -76,10 +83,12 @@ void VideoParamInit_8433( void )
     H264SetGOP( H264_GOP );
     H264SetRateMode( H264_CBR_MODE );
     H264SetBitRate( bparam.stVencParam.bitrate );
+#endif
 }
 
 void VideoParamInit_3861( void )
 {
+#ifdef SENSOR_3861
     H264SetBrightness(bparam.stVencParam.brightness);
     H264SetContrast(bparam.stVencParam.contrast >> 3);
 
@@ -104,9 +113,53 @@ void VideoParamInit_3861( void )
 #endif
     sleep(1);
     H264SetMirr( mirrflip );
+#endif
 }
 
+#ifdef SENSOR_3894
+void VideoParamInit_3894( void )
+{
+    bparam.stVencParam.brightness = 128;
+    bparam.stVencParam.contrast = 128;
+    bparam.stVencParam.saturation = 128;
+    bparam.stVencParam.chroma = 90;
+	NoteSaveSem();
+	
+	uvcCtrlParam.cur_value = 0;
+	H264_SetUvcCtrlParam(eUvcParam_Brightness,&uvcCtrlParam);//-127---128
 
+	uvcCtrlParam.cur_value = 16;
+	H264_SetUvcCtrlParam(eUvcParam_Contrast,&uvcCtrlParam); //0---30
+
+	uvcCtrlParam.cur_value = 0;
+	H264_SetUvcCtrlParam(eUvcParam_Hue,&uvcCtrlParam);//-180---180
+
+	uvcCtrlParam.cur_value = 64;
+	H264_SetUvcCtrlParam(eUvcParam_saturation,&uvcCtrlParam);//0---127
+
+	uvcCtrlParam.cur_value = 10;
+	H264_SetUvcCtrlParam(eUvcParam_Sharpness,&uvcCtrlParam);//0---60
+
+	uvcCtrlParam.cur_value = 90;
+	H264_SetUvcCtrlParam(eUvcParam_Gamma,&uvcCtrlParam);//20---250
+
+	uvcCtrlParam.cur_value = 1;
+	H264_SetUvcCtrlParam(eUvcParam_WhiteBalanceTemperatureAuto,&uvcCtrlParam);//0---1
+
+	uvcCtrlParam.cur_value = 6000;
+	H264_SetUvcCtrlParam(eUvcParam_WhiteBalanceTemperature,&uvcCtrlParam);//2500---7000
+
+	uvcCtrlParam.cur_value = 0;
+	H264_SetUvcCtrlParam(eUvcParam_Backlight_Compensation,&uvcCtrlParam);//0---2
+
+	uvcCtrlParam.cur_value = 0;
+	H264_SetUvcCtrlParam(eUvcParam_Gain,&uvcCtrlParam);//0---2
+
+	uvcCtrlParam.cur_value = 2;
+	H264_SetUvcCtrlParam(eUvcParam_PowerLineFrequency,&uvcCtrlParam);//0---2
+
+}
+#endif
 void camera_control( unsigned char index, unsigned int param )
 {
     char flag = 0;
@@ -222,11 +275,20 @@ void camera_control( unsigned char index, unsigned int param )
 						SetSnapshotVideo(TRUE);
 						H264SetSize(bparam.stVencParam.bysize, bparam.stVencParam.byframerate );
 #endif
+
+#ifdef SENSOR_3894
+						Textout("livestream: 5fps VGA");
+						bparam.stVencParam.byframerate = 5;
+						bparam.stVencParam.bysize = 0;//VGA
+						H264_ChangeResolution(bparam.stVencParam.bysize, bparam.stVencParam.byframerate);
+#endif
+
+
                                             
 #ifdef SENSOR_8433
 						Textout("livestream: 5fps VGA");
                         //MjpgSetSize(3);
-						bparam.stVencParam.byframerate = 10;
+						bparam.stVencParam.byframerate = 5;
 
 						if(0 !=bparam.stVencParam.bysize)
 						{
@@ -249,7 +311,14 @@ void camera_control( unsigned char index, unsigned int param )
 						SetSnapshotVideo(FALSE);
                         H264SetSize(bparam.stVencParam.bysize, bparam.stVencParam.byframerate );
 #endif
-                        
+
+#ifdef SENSOR_3894
+						Textout("livestream: 10fps VGA");
+						bparam.stVencParam.byframerate = 10;
+						bparam.stVencParam.bysize = 0;//VGA
+						H264_ChangeResolution(bparam.stVencParam.bysize, bparam.stVencParam.byframerate);
+#endif
+
 
 #ifdef SENSOR_8433
 						Textout("livestream: 10fps VGA");
@@ -274,7 +343,14 @@ void camera_control( unsigned char index, unsigned int param )
                         bparam.stVencParam.bysize = 0;
                         SetSnapshotVideo(FALSE);
                         H264SetSize(bparam.stVencParam.bysize, bparam.stVencParam.byframerate );
-#endif						
+#endif		
+
+#ifdef SENSOR_3894
+						Textout("livestream: 15fps VGA");
+						bparam.stVencParam.byframerate = 15;
+						bparam.stVencParam.bysize = 0;//VGA
+						H264_ChangeResolution(bparam.stVencParam.bysize, bparam.stVencParam.byframerate);
+#endif
 
 #ifdef SENSOR_8433
 						bparam.stVencParam.byframerate = 15;
@@ -292,12 +368,20 @@ void camera_control( unsigned char index, unsigned int param )
 #endif
                         break;
                     case 3:
-                        Textout("livestream: 10fps 720P");
-                        bparam.stVencParam.byframerate = 10;
+                        Textout("livestream: 15fps 720P");
+                        bparam.stVencParam.byframerate = 15;
                         bparam.stVencParam.bysize = 3;
                         SetSnapshotVideo(FALSE);
+#ifdef SENSOR_3894
+						H264_ChangeResolution(bparam.stVencParam.bysize, bparam.stVencParam.byframerate);
+#else
                         H264SetSize(bparam.stVencParam.bysize, bparam.stVencParam.byframerate );
+#endif
+#ifdef SENSOR_3894
+						H264_SetIFramePeriod(bparam.stVencParam.byframerate);
+#else
                         H264SetGOP(bparam.stVencParam.byframerate);
+#endif
 #ifdef SENSOR_8433
                         //MjpgSetSize(3);
 #endif
@@ -336,14 +420,21 @@ void VideoParamChange( void )
 
     switch ( videocmd ) {
         case 0:         //720p vga qvga
+#ifdef SENSOR_3894
+			H264_ChangeResolution(bparam.stVencParam.bysize, bparam.stVencParam.byframerate);
+#else
             H264SetSize(bparam.stVencParam.bysize, bparam.stVencParam.byframerate );
+#endif
             break;
 
         case 1:
 #if defined(SENSOR_3861) || defined(USE_SENSOR_DEFAULT)
             H264SetBrightness(bparam.stVencParam.brightness);
-#else
+#elif defined (SENSOR_8433)
             H264SetBrightness( ( bparam.stVencParam.brightness - 128 ) >> 2 );
+#elif defined (SENSOR_3894)
+			uvcCtrlParam.cur_value = (bparam.stVencParam.brightness - 127);
+			H264_SetUvcCtrlParam(eUvcParam_Brightness,&uvcCtrlParam);
 #endif
 
             break;
@@ -353,13 +444,23 @@ void VideoParamChange( void )
             H264SetContrast(bparam.stVencParam.contrast >> 3);
 #elif defined(USE_SENSOR_DEFAULT)
             H264SetContrast( bparam.stVencParam.contrast );
-#else
+#elif defined(SENSOR_8433)
             H264SetContrast( bparam.stVencParam.contrast / 4 );
+#elif defined(SENSOR_3894)
+			uvcCtrlParam.cur_value = (bparam.stVencParam.contrast /8);
+			if(uvcCtrlParam.cur_value >30)
+				uvcCtrlParam.cur_value = 30;
+			H264_SetUvcCtrlParam(eUvcParam_Contrast,&uvcCtrlParam);
 #endif
             break;
 
         case 3:         //mode
+#ifdef SENSOR_3894
+			uvcCtrlParam.cur_value = videoparam;
+			H264_SetUvcCtrlParam(eUvcParam_PowerLineFrequency,&uvcCtrlParam);
+#else
             H264EnvMode(videoparam);
+#endif
             break;
 
         case 5:         //mirr flip
@@ -375,34 +476,54 @@ void VideoParamChange( void )
             else if ( videoparam == 3 ) videoparam = 4;     //mirr flip
 #endif
 
+#ifdef SENSOR_3894
+			H264_SetMirr(videoparam);
+#else
             H264SetMirr( videoparam );
+#endif
             break;
 
         case 6:         //framerate
+#ifdef SENSOR_3894
+			H264_ChangeResolution(bparam.stVencParam.bysize, bparam.stVencParam.byframerate);
+#else
             H264SetFrameRate(bparam.stVencParam.byframerate);
+#endif
             break;
 
         case 7:
-#ifdef SENSOR_3861
+#if defined (SENSOR_3861)
             VideoParamInit_3861();
-#else
+#elif defined (SENSOR_8433)
             VideoParamInit_8433();
+#elif defined (SENSOR_3894)
+			VideoParamInit_3894();
 #endif
             break;
 
         case 8:         //saturation
+#ifdef SENSOR_3894     
+			uvcCtrlParam.cur_value = (bparam.stVencParam.saturation >> 1);
+			H264_SetUvcCtrlParam(eUvcParam_saturation,&uvcCtrlParam);
+#else
 #ifdef USE_SENSOR_DEFAULT
             H264SetSaturation( bparam.stVencParam.saturation );
 #else
             H264SetSaturation( bparam.stVencParam.saturation >> 1 );
 #endif
+#endif
             break;
 
         case 9:         //hue
+#ifdef SENSOR_3894
+			uvcCtrlParam.cur_value = (bparam.stVencParam.chroma - 90)*2;
+			H264_SetUvcCtrlParam(eUvcParam_Hue,&uvcCtrlParam);
+#else
 #ifdef USE_SENSOR_DEFAULT
             H264SetHue( bparam.stVencParam.chroma );
 #else
             H264SetHue( ( bparam.stVencParam.chroma - 128 ) >> 2 );
+#endif
 #endif
             break;
 
@@ -415,7 +536,11 @@ void VideoParamChange( void )
             break;
 
 		case 13:
+#ifdef SENSOR_3894
+			H264_SetBitrate( bparam.stVencParam.bitrate );
+#else
 			H264SetBitRate( bparam.stVencParam.bitrate );
+#endif
 			break;
 
         case 14:    //sharpness
@@ -459,7 +584,11 @@ void StopVideoCaptureEx()
 {
     if(1 == videoCaptureFlag) {
 		printf("StopVideoCapture\n");
+#ifdef SENSOR_3894
+		H264_StopVideoCapture();
+#else
         StopVideoCapture();
+#endif
         videoCaptureFlag = 0;
     }
 }
@@ -468,7 +597,11 @@ void StartVideoCaptureEx()
 {
     if(0 == videoCaptureFlag) {
 		printf("StartVideoCapture7\n");
+#ifdef SENSOR_3894
+		H264_StartVideoCapture(bparam.stVencParam.bysize, bparam.stVencParam.byframerate);
+#else
         StartVideoCapture(bparam.stVencParam.bysize, bparam.stVencParam.byframerate);
+#endif
 #if defined(SENSOR_8433)
         VideoParamInit_8433();
 #elif defined(SENSOR_3861)
@@ -492,7 +625,7 @@ unsigned char GetMainFrameRate()
 
 unsigned char GetSubFrameRate()
 {
-    return bparam.stVencParam.byframerate;
+    return bparam.stVencParam.byframerate; 
 }
 
 void VideoInInit( void )

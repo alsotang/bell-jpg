@@ -107,7 +107,6 @@ void WritePushParams(void)
 #endif
 
 #ifdef FCM_PUSH
-
 void WriteFcmParams(void)
 {
 	Textout("WriteFcmParams");

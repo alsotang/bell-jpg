@@ -380,7 +380,7 @@ int P2P_init( void )
 
 #elif defined (OLD_KERNEL_XDBL) || defined(NEW_KERNEL_XDBL)
     pServerString = (char *)"HZLXPHPGLKSYPIHUPDTALQEEPKLRIHLNLUPEAOEPLOSQHXENEJPAHYIALSERIBEKLKICIEHUEIELEGEEEHEOEM-$$";
-#elif defined (PREFIX_8433)
+#elif defined (PREFIX_8433_PPCS) 
     pServerString = (char *)"HZLXPHPGLKSYPIHUPDTALQEEPKLRIHLNLUPEAOEPLOSQHXENEJPAHYIALSERIBEKLKICIEHUEIELEGEEEHEOEM-$$";
 
 #else
@@ -394,9 +394,9 @@ int P2P_init( void )
 
 #else
 #ifdef PPCS_AES_P2P
-#if defined (UK_CUSTOMERS_OLD_KERNEL)|| defined (UK_CUSTOMERS_NEW_KERNEL)
+#if defined (UK_CUSTOMERS_OLD_KERNEL)|| defined (UK_CUSTOMERS_NEW_KERNEL) || defined(AES_FM34_PPCS)
     pServerString = (char *)("EFGHFDBMKDIHGEJDEBHLFBEPGHNEHCMEHLFFBNDCAIJOKOKDDDBLDEPEHAKGIOKCBFNFKPCLPBNIAA");//英国客户善云新字符串
-#elif defined (PREFIX_8433) || defined(PREFIX_FM34_PPCS)
+#elif defined (PREFIX_8433_PPCS) || defined(PREFIX_FM34_PPCS) || defined(PREFIX_8388S_PPCS) || defined(FM34_3894_PPCS)
     //使用亮点的尚云服务器
     pServerString = (char *)("EBGAEIBIKHJJGFJJEEHOFAENHLNBHGNMHMFDAADAAOJNKNKGDNAPDJPIGAKOIHLBBJNMKLDIPENJBKDE");
 #endif
@@ -6817,7 +6817,8 @@ void CallbackWaitingAgree(unsigned int sit)
 
 
     if ( index < MAX_P2P_CONNECT ) {
-#ifdef ZHENGSHOW
+		
+#ifdef DINGDONG
         ControlIO(BELL_NOTYCE_TO_MCU,0);
 #endif
         Textout("P2P[%d] Agree, Exit Wait, Enter Talking", index);
@@ -6852,7 +6853,8 @@ void CallbackWaitingAgree(unsigned int sit)
 
         nTimerCall = 0;
         RegisterBaSysCallback(0xFF, 1, CallbackTalking);
-#ifdef ZHENGSHOW
+		
+#ifdef DINGDONG
         usleep(1000000);
         ControlIO(BELL_NOTYCE_TO_MCU,1);
 #endif
@@ -7085,12 +7087,11 @@ void OnCall()
         OnIROpen();
 #endif
 
-#if  defined (KONX) || defined (BELINK)
+#if  defined (ZHENGSHOW) || defined (KONX) || defined (BELINK)
     EnableIR(0);
 #endif
 
-#ifdef ZHENGSHOW
-    EnableIR(0);
+#ifdef DINGDONG
     SetMcuNotyceFlag(0);
 #endif
 
@@ -7120,9 +7121,11 @@ void OnCall()
     char szTitle[128] = {0};
     sprintf(szTitle, "%s,%s,%d", szCallTime,bparam.stIEBaseParam.dwDeviceID,BELL_CALL);
     MsgPush(bparam.stIEBaseParam.dwDeviceID, szTitle);
+#ifdef FCM_PUSH
     memset(szTitle,0,sizeof(szTitle));
     sprintf(szTitle, "calling,%s,%s,%d", szCallTime,bparam.stIEBaseParam.dwDeviceID,BELL_CALL);
     FcmPush(szTitle);
+#endif
 #endif
 
 #ifdef  FACTOP
@@ -8803,7 +8806,9 @@ int P2PSetAlarmConfig( int sit, short cmd )
     if ( iRet == 0 ) {
         bparam.stBell.alarm_level = iValue;
         if(bparam.stBell.alarm_on) {
+#ifndef SENSOR_3894
             MotionResutlClear();
+#endif
             AlarmMotionInit(iValue);
         }
         Textout("alarm_level=%d", bparam.stBell.alarm_level );
@@ -10538,8 +10543,14 @@ void p2pcmdproc( int sit )
 void* p2plistenThreadProc( void* p )
 {
     int handle = -1;
+	
+#ifdef LIYUANCHUANG
+	char icbID[24];
+	char *pIcb;
+#endif
 
     P2P_init();
+	
     while ( 1 ) {
         if ( ( strlen( bparam.stIEBaseParam.dwDeviceID ) == 0 ) || ( bparam.stIEBaseParam.dwDeviceID[0] == 0x00 ) ) {
             printf("dwDeviceID is null\n");
@@ -10547,8 +10558,19 @@ void* p2plistenThreadProc( void* p )
             continue;
         }
 #ifdef PPCS_API
-        handle = PPPP_Listen( bparam.stIEBaseParam.dwDeviceID, 300, 0, 1,bparam.stIEBaseParam.dwApiLisense);
-        Textout("ApiLisense = %s",bparam.stIEBaseParam.dwApiLisense);
+#ifdef LIYUANCHUANG //真实id号如ICB-0012345-ABCDEF,烧录进来的会改为ZSKJ-1012345-ABCDEF,所以要还原回去
+	pIcb = strchr(bparam.stIEBaseParam.dwDeviceID,'-');
+	if(pIcb != NULL)
+	{
+		memset(icbID,0,sizeof(icbID));
+		sprintf(icbID,"ICB-0%s",pIcb+2);
+		printf("the icb ID is %s\n",icbID);
+		handle = PPPP_Listen( icbID, 300, 0, 1,bparam.stIEBaseParam.dwApiLisense);
+	}
+#else
+	handle = PPPP_Listen( bparam.stIEBaseParam.dwDeviceID, 300, 0, 1,bparam.stIEBaseParam.dwApiLisense);
+#endif
+	Textout("ApiLisense = %s",bparam.stIEBaseParam.dwApiLisense);
 #else
         handle = PPPP_Listen( bparam.stIEBaseParam.dwDeviceID, 300, 0, 1 );
 #endif
@@ -11147,7 +11169,7 @@ void* p2paudioThreadProc( void* p )
     int i = 0;
 
     if ( ( sem_init( &p2paudio, 0, 0 ) ) != 0 ) {
-        //printf( "sem init failed\n" );
+        printf( "sem init failed\n" );
     }
 
     while ( 1 ) {

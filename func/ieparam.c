@@ -4342,7 +4342,10 @@ int cgisetalarm( char* pbuf, char* pparam, unsigned char byPri )
     //motion
     if ( GetIntParamValue( pparam, "motion_armed", &iValue ) != -1 )
     {
-        MotionResutlClear();
+#ifndef SENSOR_3894
+		MotionResutlClear();
+#endif
+
         bparam.stAlarmParam.byMotionEnable = iValue;
         printf( "motion enable=%d\n", bparam.stAlarmParam.byMotionEnable );
     }

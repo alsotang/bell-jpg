@@ -778,15 +778,21 @@ typedef struct
 #define	BELL_IR_CONTROL0		_MOTO_D0		//1=Enable, 0=Disable
 #define	BELL_IR_CONTROL1		_MOTO_D1		//1=Enable, 0=Disable
 #define BELL_AUDIO          _MOTO_D4        //0=On, 1=Off  
+#ifdef RUIYITONG
+#define BELL_OPENDOOR_2   _MOTO_D6    //睿易通开锁持续一秒
+#else
 /* add begin by yiqing, 2015-09-04, 原因: 5350开门后通知单片机*/
 #define BELL_NOTYCE_TO_MCU   _MOTO_D6//_MOTO_D3
+#endif
 
 /* add begin by yiqing, 2016-03-26*/
 #define	BELL_OPENDOOR2		_MOTO_D7		//Open Door(K)
 
+#ifdef NEW_BRAOD_AES
 /* add begin by yiqing, 2016-03-26,英国客户新AES，每天00:00重启*/
 #define AUTO_REBOOT_IO1     _MOTO_D2
 #define AUTO_REBOOT_IO2     _MOTO_D5
+#endif
 
 #endif
 

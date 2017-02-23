@@ -1415,6 +1415,7 @@ int GetSnapStream( unsigned char* pdst, char flag )
 
 int CaptureJpeg( char* filename )
 {
+	Textout("CaptureJpeg,filename=%s",filename);
     int                     	iRet;
     unsigned int           len     = 0;
     unsigned char*       pbuf   = NULL;

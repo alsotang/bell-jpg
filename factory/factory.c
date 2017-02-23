@@ -393,6 +393,7 @@ void ConfigVersion( void )
 	/* add begin by yiqing, 2016-07-26*/
 	//添加bparam.stBell.userToken[i]变量
 	//4.5.11.24
+
 	nVersion = 24;
 
 #elif defined (PREFIX_OBJ)  //new kernel
@@ -506,13 +507,16 @@ void ConfigVersion( void )
 	//define SUPPORT_IRCUT
 	//4.7.12.33
 
-	/* add begin by yiqing, 2016-08-06*/
-	//undefine SUPPORT_FM34
-    //undefine SUPPORT_IRCUT
-    //初始化摄像头的时候sleep10秒，避免新dsp没图像问题
+	/* add begin by yiqing, 2016-09-08*/
+	//sync
 	//4.7.12.34
 
-	nVersion = 34;
+	/* add begin by yiqing, 2016-09-12*/
+	//undefine SUPPORT_FM34
+    //undefine SUPPORT_IRCUT
+    //mic声音由0xe2改为0xff
+	//4.7.12.35
+	nVersion = 35;
 
 #elif defined (OLD_KERNEL_XDBL)
     //4.8.12.10
@@ -521,24 +525,98 @@ void ConfigVersion( void )
 #elif defined (NEW_KERNEL_XDBL)
     //4.9.12.10
     nVersion = 10;
+#elif defined (PREFIX_8388S_PPCS)
+	//4.8.12.10
+	//define LIYUANCHUANG //黄灿项目
+
+	/* add begin by yiqing, 2016-11-22*/
+	//mic声音由0xff改为0xe2
+	//use daemon.bell.v26
+	//4.8.12.11
+
+	nVersion = 11;
 
 #elif defined (PREFIX_FM34_PPCS)
     //4.9.12.10
-    nVersion = 10;
+    
+    /* add begin by yiqing, 2016-09-07*/
+	//4.9.11.10
 
-#elif defined (PREFIX_8433)
+	/* add begin by yiqing, 2016-09-21*/
+	//喇叭声音小
+	//4.9.12.11
+
+	/* add begin by yiqing, 2016-10-09*/
+	//define RUIYITONG//睿易通项目
+	//4.9.12.12
+
+	/* add begin by yiqing, 2016-11-11*/
+	//#define TAICHUAN  //太川  由于硬件问题，此版本IRC控制跟普通版本相反
+	//#define DINGDONG
+	//4.9.12.13
+    nVersion = 13;
+
+#elif defined (PREFIX_8433_PPCS)
 	/* add begin by yiqing, 2016-07-08*/
 	//使用亮点科技的尚云服务器
 	//8433
 	//4.10.21.10
 
 	/* add begin by yiqing, 2016-08-05*/
-	//更新复位脚为邋moto_D7
+	//更新复位脚为moto_D7
 	//#define FCM_PUSH
 	//4.10.21.11
 
 	/* add begin by yiqing, 2016-08-25*/
+	//define SUPPORT_IRCUT
 	//4.10.22.12
+
+	/* add begin by yiqing, 2016-09-01*/
+	//define SUPPORT_FM34
+	//4.10.22.13
+
+	/* add begin by yiqing, 2016-09-08*/
+	//使用新的8433源码，添加移动侦测接口
+	//4.10.21.14
+
+	/* add begin by yiqing, 2016-09-08*/
+	//undefine SUPPORT_FM34
+	//4.10.22.15
+
+	/* add begin by yiqing, 2016-09-12*/
+	//mic声音由0xe2改为0xff
+	//4.10.22.16
+
+	/* add begin by yiqing, 2016-11-04*/
+	//添加彩转黑功能
+	//4.10.22.17
+	nVersion = 17;
+
+#elif defined (AES_FM34_PPCS)
+	/* add begin by yiqing, 2016-11-04*/
+	//4.11.12.10
+
+	/* add begin by yiqing, 2016-12-22*/
+	//MIC volume 由0x0f00改为0x1f00
+	//define NEW_BRAOD_AES
+	//4.11.12.11
+
+	/* add begin by yiqing, 2016-12-29*/
+	//#define LOCK_TOGGLED
+	//4.11.12.12
+	nVersion = 12;
+
+#elif defined (FM34_3894_PPCS)
+	/* add begin by yiqing, 2016-12-24*/
+	//4.12.22.10
+
+	/* add begin by yiqing, 2017-01-03*/
+	//define RUIYITONG//睿易通项目
+	//4.12.22.11
+
+	/* add begin by yiqing, 2017-02-15*/
+	//喇叭声音参数改为0x03,0x90
+	//4.12.22.12
 	nVersion = 12;
 #endif
 

@@ -990,7 +990,7 @@ void *pushThreadProc(void *p)
 			continue;
 		}
 	    int iRet = 0;
-	    char *sendBuf[128] = {0};
+	    char sendBuf[128] = {0};
 
 	    int sendTotalNum = 0;
 	    int sendSuccessNum = 0;

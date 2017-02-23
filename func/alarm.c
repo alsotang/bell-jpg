@@ -652,7 +652,28 @@ void AlarmMotionInit(int sensitivity)
     int motionarea=0x0001 | 0x0002 | 0x0004 ////1, 2, 3
                     |0x0008 | 0x0010 | 0x0020  //4, 5, 6
                      | 0x0040 | 0x0080 | 0x0100;   //7, 8, 9
-
+#ifdef SENSOR_3894
+	switch(sensitivity)
+	{
+		case 1:
+			sensitivity = 1;
+			break;
+		case 2:
+			sensitivity = 1;
+			break;
+		case 3:
+			sensitivity = 2;
+			break;
+		case 4:
+			sensitivity = 2;
+			break;
+		case 5:
+		default:
+			sensitivity = 3;
+			break;
+	}
+	H264_SetMotionEnable(sensitivity);//0:disable,1:low,2:middle,3:high
+#else
     switch(sensitivity)
 	{
 		case 1:
@@ -671,15 +692,13 @@ void AlarmMotionInit(int sensitivity)
 		default:
 			sensitivity = 2;
 			break;
-
-	}                     
-    
-    motionvalue = MOTION_THRESHOLD_BASE<<(nMotionInterval - 1);
+	}       
+	motionvalue = MOTION_THRESHOLD_BASE<<(nMotionInterval - 1);
     Textout("motion interval=%d, threshold=0x%08x, sensitivity=%d", nMotionInterval, motionvalue, sensitivity);
     motionvalue *= sensitivity;
-
-    H264SetMotionEnable(MOTION_ENABLE);
-    ObjMotionInit( motionvalue, motionarea );
+	H264SetMotionEnable(MOTION_ENABLE);
+	ObjMotionInit( motionvalue, motionarea );
+#endif   
 }
 
 
@@ -705,7 +724,7 @@ void* MotionCheckProc( void* p ) 	//Motion check
         Textout("====>Start motion check");
         break;
     }
-
+	sleep(10);
     AlarmMotionInit(bparam.stBell.alarm_level);
 
     while ( 1 )

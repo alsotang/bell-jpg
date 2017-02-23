@@ -65,12 +65,15 @@ int serverinit( void )
 
     SensorInit();
     VencStart();
-    
+   
+
 #if defined(SENSOR_8433)
     SetUseSensorDefaultFlag( SENSOR_DEFAULT_ENABLE );
     VideoParamInit_8433();
 #elif defined(SENSOR_3861)
     VideoParamInit_3861();
+#elif defined (SENSOR_3894)
+	VideoParamInit_3894();
 #endif
     
     LogStart();
@@ -167,6 +170,7 @@ extern void YiNetWorkThread( void );
 int main( void )
 {
 	Resourceinit();
+#if 1
 #ifndef UNABLE_AUDIO
     AudioCodecInit();
 	AudioCodecOpen();
@@ -177,24 +181,22 @@ int main( void )
 #endif
     AudioStart();
 #endif
+#endif
     BaSysTimerInit();
 
     //Resourceinit();
+    
     serverinit();
     InitMoto();
     MotoThreadStart();
-#if 0
-        SetEncPower(0);
-        sleep(1);
-        SetEncPower(1);
-#endif
-
+	//serverinit();
+	
 #if 0
 #ifndef UNABLE_AUDIO
         AudioCodecInit();
         AudioCodecOpen();
         
-#ifdef SUPPORT_FM34m
+#ifdef SUPPORT_FM34
         fm_Init();
 #else 
         CheckAudioChip();
@@ -217,12 +219,12 @@ int main( void )
 			SaveSystemParam( &bparam );
 		}
 	}
-
+	
 	SetBellAlarmOn(bparam.stBell.alarm_on);
 
 	#ifdef ZHENGSHOW
 
-	#if defined (UK_CUSTOMERS_OLD_KERNEL)|| defined  (UK_CUSTOMERS_NEW_KERNEL)
+	#if defined (UK_CUSTOMERS_OLD_KERNEL)|| defined  (UK_CUSTOMERS_NEW_KERNEL) || defined (AES_FM34_PPCS)
     Textout("-------------------------------this is UK customers-----------------------------");
 	if(access("/system/Wireless/mute.wav",F_OK) == 0 )
 		DoSystem("rm /system/Wireless/mute.wav");
@@ -273,15 +275,17 @@ int main( void )
 		NoteSaveSem();
 	}
 
-
+#ifdef DINGDONG
      ControlIO(BELL_NOTYCE_TO_MCU,1);
-
+#endif
 	#endif
 	#endif
+	
 
 	SytemStartupLed();
 
     
+	
 	if ( !ExistGpsFile())
 	{
 	    #ifdef DELAY_STARTUP       
@@ -295,7 +299,7 @@ int main( void )
 	Textout("bparam.stBell.lock_type=%d",bparam.stBell.lock_type);
     if ( bparam.stBell.lock_type == 1 )//nc
     {
-        #ifdef SUPPORT_FM34
+        #ifdef LOCK_TOGGLED
 		Textout("set lock is 0");
         ControlIO(BELL_OPENDOOR, 0);
 		#ifdef NEW_BRAOD_AES
@@ -303,12 +307,15 @@ int main( void )
 		#endif
         #else
         ControlIO(BELL_OPENDOOR, 1);
+		#ifdef NEW_BRAOD_AES
+		ControlIO(BELL_OPENDOOR2, 1);
+		#endif
 		Textout("set lock is 1");
         #endif
     }
 	else//no
 	{
-		#ifdef SUPPORT_FM34
+		#ifdef LOCK_TOGGLED
 		Textout("set lock is 1");
         ControlIO(BELL_OPENDOOR, 1);
 		#ifdef NEW_BRAOD_AES
@@ -317,8 +324,15 @@ int main( void )
         #else
 		Textout("set lock is 0");
         ControlIO(BELL_OPENDOOR, 0);
+		#ifdef NEW_BRAOD_AES
+		ControlIO(BELL_OPENDOOR2, 0);
+		#endif
         #endif
 	}
+	#endif
+
+	#ifdef RUIYITONG
+	bparam.stBell.lock_delay =3;
 	#endif
 
 	#ifdef YINETWORK
@@ -331,8 +345,6 @@ int main( void )
     while ( 1 )
     {
         sleep( 60 );
-        //ControlIO(BELL_NOTYCE_TO_MCU,0);
-        //Textout("11111111111111111111111111111111111111111111111111111");
     }
 
     return 0;

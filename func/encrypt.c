@@ -59,16 +59,26 @@ void WS222_SDA( char value )
     #endif
 
 
-#ifdef SUPPORT_FM34
+#ifdef LOCK_TOGGLED
 		if ( bparam.stBell.lock_type == 0)//no
 		{	
 			gpiovalue |= BELL_OPENDOOR;
+#ifdef NEW_BRAOD_AES
+			gpiovalue |= BELL_OPENDOOR2;
+#endif    
 		}
 #else
 		if ( bparam.stBell.lock_type == 1 )//nc
 		{
         	gpiovalue |= BELL_OPENDOOR;
+#ifdef NEW_BRAOD_AES
+			gpiovalue |= BELL_OPENDOOR2;
+#endif 
 		}
+#endif
+
+#ifdef  RUIYITONG
+		//gpiovalue |= BELL_OPENDOOR_2;
 #endif
 
 
@@ -97,16 +107,28 @@ void WS222_SCL( char value )
     #endif
     
 
-#ifdef SUPPORT_FM34
+#ifdef LOCK_TOGGLED
 	if ( bparam.stBell.lock_type == 0)//no
 	{
 		gpiovalue |= BELL_OPENDOOR;
+#ifdef NEW_BRAOD_AES
+		gpiovalue |= BELL_OPENDOOR2;
+#endif 
+
 	}
 #else
 	if ( bparam.stBell.lock_type == 1 )//nc
 	{
 		gpiovalue |= BELL_OPENDOOR;
+#ifdef NEW_BRAOD_AES
+		gpiovalue |= BELL_OPENDOOR2;
+#endif 
+
 	}
+#endif
+
+#ifdef  RUIYITONG
+	//gpiovalue |= BELL_OPENDOOR_2;
 #endif
 
 
@@ -142,8 +164,6 @@ void gpioinit( void )
 {
     int iRet;
     #if defined (SUPPORT_FM34)
-
-
 		#if defined (SUPPORT_IRCUT)
 			/* add begin by yiqing, 2015-10-20设置第17脚MOTO_UP为输入脚PIR检测用*/
 			iRet = ioctl( i2cfd , RALINK_GPIO_SET_DIR, 0x0fc07806 );
@@ -173,7 +193,6 @@ void gpioin( void )
 		#else
 		iRet = ioctl( i2cfd , RALINK_GPIO_SET_DIR, 0x0dc27804 );
 		#endif
-    
     
     #elif defined(JINQIANXIANG)
     iRet = ioctl( i2cfd , RALINK_GPIO_SET_DIR, 0x0fc04004 );
@@ -1012,7 +1031,11 @@ void AudioPowerOpen( int value )
     #endif
 
     #ifdef BELL_AUDIO
+	#ifdef XINSILU_BOARD//新思路的板子功放高有效
+	gpiovalue &= ~BELL_AUDIO;
+	#else 
     gpiovalue |= BELL_AUDIO;
+	#endif
     #endif
 
     #ifdef BELL_AUDIO_2ND
@@ -1202,7 +1225,8 @@ void CheckAudioChip()
 
                     //18,	0x12, 0xd2,  //ADC CONTROL 10, DEFAULT 0011 1000   
                     //18,	0x12, 0xda,     // 11011010 MIC Volume
-                    18,	0x12, 0xe2,  // 11100010   
+                    18,	0x12, 0xe2,  // 11100010  
+                    //18,	0x12, 0xff,  // 
                     					//7-6	00 – ALC off
                     					//5-3	Set maximum gain of PGA 11011010 
                     					//2-0	Set minimum gain of PGA 11100010
@@ -1571,7 +1595,7 @@ Fm34Driver_t fm34Driver[MAX_FM34_DRIVER] =
                                                         0x0012:16k PDM DMIC sample rate, PCM/I2S 8k sample rate, Use for BWE feature
                                                      */
     //{0x23,0x0C,0x04,0x00},  /*MIC volume
-    {0x23,0x0C,0x0F,0x00},  /*MIC volume
+    {0x23,0x0C,0x1a,0x00},  /*MIC volume
                                                 0x0000~0x7FFF
                                                 0x0100 is unit gain
                                                 */
@@ -1580,7 +1604,7 @@ Fm34Driver_t fm34Driver[MAX_FM34_DRIVER] =
 #ifdef VOLUME_INCREASE                                                
     {0x23,0x0D,0x26,0x00},
 #else
-    {0x23,0x0D,0x07,0x90},
+    {0x23,0x0D,0x03,0x70},
 #endif
                                         /*Speaker volume
                                                     0x0000~0x7FFF

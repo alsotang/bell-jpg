@@ -74,14 +74,6 @@ void *AutoRebootThreadProc(void *p)
 
 	sleep(25);
 
-	/*
-	while(1)
-	{
-		OnDoorOpenEx();
-		OnDoor2OpenEx();
-		sleep(6);
-	}
-	*/
 	while(1)
 	{	
 		gettimeofday( &time, NULL );
@@ -98,8 +90,10 @@ void *AutoRebootThreadProc(void *p)
 			Textout("*************************************************");
 			Textout("****************[hour:%d  min:%d]****************",hour,min);
 			Textout("*************************************************");
+#ifdef NEW_BRAOD_AES
 			ControlIO(AUTO_REBOOT_IO1, 1);
 			ControlIO(AUTO_REBOOT_IO2, 1);
+#endif
 			sleep(60);
 		}
 		sleep(1);

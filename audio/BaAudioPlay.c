@@ -19,6 +19,7 @@
 #endif
 
 
+
 static sem_t semBaAudioPlayStart;
 static sem_t semBaAudioPlayStop; 
 #ifdef SUPPORT_FM34
@@ -55,7 +56,19 @@ const char szWaveFile[WF_COUNT][64] =
     {"/system/Wireless/mute.wav"}
 };
 
+/* add begin by yiqing, 2017-02-15*/
+char bPlayAudioFlag = 0;
+/* add end by yiqing, 2017-02-15 */
 
+void setPlayAudioFlag(char value)
+{
+	bPlayAudioFlag = value;
+}
+
+char getPlayAudioFlag(void)
+{
+	return bPlayAudioFlag;
+}
 void StopAudioPlay()
 {
 #ifdef ENABLE_AUDIO_PLAY
@@ -300,6 +313,11 @@ void* BaAudioPlayProc(void* p)
         {
             fnBaAudioPlayCallback();
         }
+
+		if( 1 == getPlayAudioFlag())
+		{
+			setPlayAudioFlag(0);
+		}
 
     }
 }

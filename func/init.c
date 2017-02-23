@@ -74,9 +74,9 @@ void InsmodUvcDriver()
     DoSystem("insmod /lib/modules/2.6.21/kernel/drivers/media/video/compat_ioctl32.ko");
     DoSystem("insmod /lib/modules/2.6.21/kernel/drivers/media/video/v4l1-compat.ko");
     DoSystem("insmod /lib/modules/2.6.21/kernel/drivers/media/video/videodev.ko");
-    #ifdef SENSOR_3861
+    #if defined (SENSOR_3861) || defined (SENSOR_3894)
     DoSystem("insmod /lib/modules/2.6.21/kernel/drivers/media/video/uvc/uvcvideo.ko");
-	Textout("=================Insmod uvc driver SENSOR_3861 end==================");
+	Textout("=================Insmod uvc driver SENSOR_3861 | SENSOR_3894 end==================");
     #else
     DoSystem("insmod /system/system/lib/uvcvideo.ko");
 	Textout("=================Insmod uvc driver 8433 end==================");
@@ -99,10 +99,12 @@ void SensorInit( void ) 			//sensor init
 #ifdef INSMOD_UVC_DRIVER
     InsmodUvcDriver();
 #endif
+    //sleep(2);
 
-    sleep(2);
-
-#ifdef PREFIX_8433
+#if defined (SENSOR_8433)
+	bparam.stVencParam.bysize = 0;	
+	bparam.stVencParam.byframerate = 10;
+#elif defined (SENSOR_3894)
 	bparam.stVencParam.bysize = 0;	
 	bparam.stVencParam.byframerate = 10;
 #else
@@ -111,7 +113,14 @@ void SensorInit( void ) 			//sensor init
 	//bparam.stVencParam.bysize = 0;	//VGA
 	//bparam.stVencParam.byframerate = 30;
 #endif
+
+#ifdef SENSOR_3894
+	Textout("SENSOR_3894 init");
+	H264_VideoInit(bparam.stVencParam.bysize, bparam.stVencParam.byframerate );
+	MJPG_VideoInit(1,bparam.stVencParam.byframerate);
+#else
 	InitSensorLib(bparam.stVencParam.bysize, bparam.stVencParam.byframerate );
+#endif	
 
     VideoInInit();
 }
@@ -119,7 +128,9 @@ void SensorInit( void ) 			//sensor init
 void VencStart( void ) 			//video codec is start
 {
     VCodecStart();
+#ifndef SENSOR_3894
     H264EncThread();
+#endif
 }
 
 void NetCmdStart( void ) 			//network command init and thread is start
