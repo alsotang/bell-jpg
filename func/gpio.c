@@ -90,6 +90,7 @@ void *AutoRebootThreadProc(void *p)
 			Textout("*************************************************");
 			Textout("****************[hour:%d  min:%d]****************",hour,min);
 			Textout("*************************************************");
+			sleep(1);
 #ifdef NEW_BRAOD_AES
 			ControlIO(AUTO_REBOOT_IO1, 1);
 			ControlIO(AUTO_REBOOT_IO2, 1);

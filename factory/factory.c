@@ -394,7 +394,11 @@ void ConfigVersion( void )
 	//添加bparam.stBell.userToken[i]变量
 	//4.5.11.24
 
-	nVersion = 24;
+	/* add begin by yiqing, 2017-04-20*/
+	//添加ios端fcm推送
+	//4.5.11.25
+	//4.5.12.25
+	nVersion = 25;
 
 #elif defined (PREFIX_OBJ)  //new kernel
     /* add begin by yiqing, 2015-06-11, 原因: */
@@ -602,9 +606,22 @@ void ConfigVersion( void )
 	//4.11.12.11
 
 	/* add begin by yiqing, 2016-12-29*/
-	//#define LOCK_TOGGLED
 	//4.11.12.12
-	nVersion = 12;
+
+	/* add begin by yiqing, 2017-03-17*/
+	//添加lock2参数
+	//修改默认密码为123456789
+	//4.11.12.13
+
+	/* add begin by yiqing, 2017-03-27*/
+	//修改开锁导致无声音的问题。原因英国客户开锁不播声音，
+	//但是也设置了setPlayAudioFlag(1)，而没有setPlayAudioFlag(0);
+	//4.11.12.14
+
+	/* add begin by yiqing, 2017-04-19*/
+	//添加fcm的ios端推送
+	//4.11.12.15
+	nVersion = 15;
 
 #elif defined (FM34_3894_PPCS)
 	/* add begin by yiqing, 2016-12-24*/
@@ -617,6 +634,11 @@ void ConfigVersion( void )
 	/* add begin by yiqing, 2017-02-15*/
 	//喇叭声音参数改为0x03,0x90
 	//4.12.22.12
+
+	/* add begin by yiqing, 2017-03-23*/
+	//更换语言包
+	//4.12.23.12 --korean
+	//4.12.24.12 --Japanese
 	nVersion = 12;
 #endif
 

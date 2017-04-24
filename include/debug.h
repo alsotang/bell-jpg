@@ -78,11 +78,13 @@
 //61=BAFANGDIANZI
 
 
-#define LANGUAGE_ID 2   //1=Chinese
+#define LANGUAGE_ID 1   //1=Chinese
 						//2=English
-						//对于英国客户来说，1:ppcs  2:pppp(旧库)
+						//3=korean
+						//4=japanes
+						//对于英国客户来UK_CUSTOMERS_NEW_KERNEL版本说，1:ppcs  2:pppp(旧库)
 
-#define PRODUCT_ID  2   //1=MJPEG
+#define PRODUCT_ID  1   //1=MJPEG
 //2=HD720(AIT-8433/SONIX 291A/B/3894)
 //0=DONT SUPPORT IOS, APK VERSION V0730
 
@@ -181,7 +183,7 @@
 
 /***************version*****************/
 //#define UK_CUSTOMERS_OLD_KERNEL
-//#define UK_CUSTOMERS_NEW_KERNEL
+#define UK_CUSTOMERS_NEW_KERNEL
 //#define OLD_KERNEL_OBJ
 //#define PREFIX_OBJ
 //#define PREFIX_ZSKJ
@@ -191,7 +193,7 @@
 //#define PREFIX_FM34_PPCS
 //#define PREFIX_8433_PPCS
 //#define AES_FM34_PPCS
-#define FM34_3894_PPCS
+//#define FM34_3894_PPCS
 /***************************************/
 
 

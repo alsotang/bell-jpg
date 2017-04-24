@@ -28,11 +28,14 @@ void StartOpenLock()
 	ControlIO(BELL_OPENDOOR_2, 1);
 #endif
 
-	/* add begin by yiqing, 2017-02-15*/
-	setPlayAudioFlag(1);//播放开锁音频内，咪头不采集声音，以免产生哒哒哒的声音
+
 
 	#ifndef UK_CUSTOMERS_NEW_KERNEL
+	#ifndef AES_FM34_PPCS
+	/* add begin by yiqing, 2017-02-15*/
+	setPlayAudioFlag(1);//播放开锁音频内，咪头不采集声音，以免产生哒哒哒的声音
 	StartAudioPlay(WF_OPENLOCK, 1, NULL);
+	#endif
 	#endif
 }
 
@@ -43,7 +46,9 @@ void StartOpenLock2()
 	SetBell2Lock(TRUE);
 	Textout("Open Lock ---------- Start ");
 	#ifndef UK_CUSTOMERS_NEW_KERNEL
+	#ifndef AES_FM34_PPCS
 	StartAudioPlay(WF_OPENLOCK, 1, NULL);
+	#endif
 	#endif
 }
 
@@ -96,7 +101,7 @@ void* ThreadOpen2DelayProc( void* p )
 
 		bOpen2Times ++;
 
-		if ( bOpen2Times >= bparam.stBell.lock_delay )
+		if ( bOpen2Times >= bparam.stBell.lock_delay2 )
 		{
 			bDoor2Opening = FALSE;
 			bOpen2Times = 0;

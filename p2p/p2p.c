@@ -1390,7 +1390,7 @@ int p2plivestream( int sit )
             break;
 
         case 28:
-            P2PTextout("UnLock2...");
+            P2PTextout("delay UnLock2...");
             if ( bIsSameCalling(sit) ) {
 #ifndef USE_V10
                 if ( p2pstream[sit].state == PS_TALKING )
@@ -1408,7 +1408,7 @@ int p2plivestream( int sit )
             break;
 
         case 29:
-            P2PTextout("UnLock1...");
+            P2PTextout("Long press to UnLock1...");
             if ( bIsSameCalling(sit) ) {
                 if ( p2pstream[sit].state == PS_TALKING ) {
                     OnDoorUnlock(1,1);
@@ -1425,7 +1425,7 @@ int p2plivestream( int sit )
             break;
 
         case 30:
-            P2PTextout("Lock1...");
+            P2PTextout("Long press to Lock1...");
             if ( bIsSameCalling(sit) ) {
                 if ( p2pstream[sit].state == PS_TALKING ) {
                     OnDoorUnlock(1,0);
@@ -1442,7 +1442,7 @@ int p2plivestream( int sit )
             break;
 
         case 31:
-            P2PTextout("UnLock2...");
+            P2PTextout("Long press to UnLock2...");
             if ( bIsSameCalling(sit) ) {
                 if ( p2pstream[sit].state == PS_TALKING ) {
                     OnDoorUnlock(2,1);
@@ -1459,7 +1459,7 @@ int p2plivestream( int sit )
             break;
 
         case 32:
-            P2PTextout("Lock2...");
+            P2PTextout("Long press to Lock2...");
             if ( bIsSameCalling(sit) ) {
                 if ( p2pstream[sit].state == PS_TALKING ) {
                     OnDoorUnlock(2,0);
@@ -6830,10 +6830,12 @@ void CallbackWaitingAgree(unsigned int sit)
         OnDoorP2PAlarm(index, szCallTime, BELL_AGREE_ME );
 #endif
 #ifdef FCM_PUSH
-        FcmPush("Call answered by another user");
+		/* modify begin by yiqing, 2017-03-17 */
+		FcmPush("Answered by another user");
+        //FcmPush("Call answered by another user");
 #endif
 #ifdef LDPUSH
-        LdPush("Other clients have been answered",0);//Another user has answered
+        LdPush("Answered by another user",0);//Another user has answered
 #endif
         //Close Other
         for(sit2=0; sit2<MAX_P2P_CONNECT; sit2++) {
@@ -7545,6 +7547,7 @@ int fcmRegister(int sit,short cmd)
 
     char    apiKey[40] = {0};
     char    token[170] = {0};
+	int    devtype = 0;
 
     unsigned char*  pparam = p2pstream[sit].buffer + sizeof( CMDHEAD );
 
@@ -7605,6 +7608,11 @@ int fcmRegister(int sit,short cmd)
         iRet = GetStrParamValueEx( pparam, "apiKey", apiKey );
         if ( iRet == 0 && apiKey[0] != 0 ) {
             strcpy(&fcmparamlist.stgcmParam[index].apiKey,apiKey);
+        }
+
+		iRet = GetIntParamValueEx( pparam, "devtype", &devtype );
+        if ( iRet == 0  ) {
+           fcmparamlist.stgcmParam[index].devType = (char)devtype;
         }
     }
     WriteFcmParams();
@@ -8482,7 +8490,15 @@ int P2PGetLockConfig( int sit, short cmd )
     */
     P2PAppendInt( &p, "lock_type", bparam.stBell.lock_type );
     P2PAppendInt( &p, "lock_delay", bparam.stBell.lock_delay );
-    Textout("lock_type=%d", bparam.stBell.lock_type );
+	Textout("lock_type=%d", bparam.stBell.lock_type );
+	/* add begin by yiqing, 2017-03-17*/
+#ifdef NEW_BRAOD_AES
+	P2PAppendInt( &p, "lock_type2", bparam.stBell.lock_type2 );
+    P2PAppendInt( &p, "lock_delay2", bparam.stBell.lock_delay2 );
+	Textout("lock_type2=%d", bparam.stBell.lock_type2 );
+#endif
+    /* add end by yiqing, 2017-03-17 */
+
     //P2PTextout("%04X, %04X, %d", p, pData, p-pData);
     //P2PTextout("Return pData = [%s]", pData);
     iRet = P2PSendBack( sit, cmd, pData, p - pData );

@@ -55,6 +55,7 @@ typedef struct _stGcmParam
 {
 	char apiKey[40];
 	char token[170];
+	char devType;
 	time_t registerTime;
 }GCMPARAM,*PGCMPARAM;
 
@@ -1004,8 +1005,11 @@ typedef struct
 
 	char	lock_type;	//0
 	char	lock_delay;	//10
-	char	c1;
-	char 	c2;
+	/* modify begin by yiqing, 2017-03-17 */
+	//char	c1;
+	//char 	c2;
+	char	lock_type2;	
+	char	lock_delay2;	
 
 	char	pin;
 	char	pin_bind;
